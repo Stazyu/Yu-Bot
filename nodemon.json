@@ -1,0 +1,7 @@
+{
+	"ignore": [
+		"frontend",
+		"temp/*",
+		"*.json"
+	]
+}
