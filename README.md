@@ -2,12 +2,12 @@
 
 # Belum sempet buat readme, install seperti biasa :v
 
-# Install :
+## Install :
 yarn install
   Atau
 npm install
 
-#run :
+## run :
 yarn run 
   atau
 npm start
