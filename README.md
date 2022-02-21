@@ -2,14 +2,14 @@
 
 # Belum sempet buat readme, install seperti biasa :v
 
-Install :
-# yarn install
+# Install :
+yarn install
   Atau
-# npm install
+npm install
 
-run :
-# yarn run 
+#run :
+yarn run 
   atau
-# npm start
+npm start
 
 Edit no owner di Whatsapp.js bagian this.owner
