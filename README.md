@@ -7,9 +7,10 @@ yarn install
   Atau
 npm install
 
-## run :
+## Run :
 yarn run 
   atau
 npm start
 
+## Note :
 Edit no owner di Whatsapp.js bagian this.owner
