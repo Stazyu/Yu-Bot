@@ -10,7 +10,7 @@ const { exec, spawn } = require('child_process');
 const ffmpeg = require('fluent-ffmpeg');
 
 // Third Party Modules
-const { default: WASocket, DisconnectReason, AnyMessageContent, delay, useSingleFileAuthState, getDevice } = require('@adiwajshing/baileys');
+const { default: WASocket, DisconnectReason, AnyMessageContent, delay, useSingleFileAuthState, getDevice, makeInMemoryStore } = require('@adiwajshing/baileys');
 const QRCode = require('qrcode')
 const P = require("pino")
 const pretty = require('pino-pretty')
@@ -43,6 +43,27 @@ class Whatsapp {
 			// }
 		})
 
+		const store = makeInMemoryStore({})
+		// can be read from a file
+		store.readFromFile('./baileys_store.json')
+		// saves the state to a file every 10s
+		setInterval(() => {
+			store.writeToFile('./baileys_store.json')
+		}, 10_000)
+
+		// the store can listen from a new socket once the current socket outlives its lifetime
+		store.bind(sock.ev)
+
+		sock.ev.on('chats.set', () => {
+			// can use "store.chats" however you want, even after the socket dies out
+			// "chats" => a KeyedDB instance
+			console.log('got chats', store.chats.all())
+		})
+
+		sock.ev.on('contacts.set', () => {
+			console.log('got contacts', Object.values(store.contacts))
+		})
+
 		sock.ev.on('connection.update', async (update) => {
 			const { connection, lastDisconnect, qr } = update
 			this.qr = qr;
@@ -72,6 +93,7 @@ class Whatsapp {
 		connection(sock);
 
 		this.sock = sock;
+		this.store = store;
 		this.SESSION_DATA = SESSION_DATA;
 		this.owner = ['6281578794887', '6283104500832'];
 		this.prefix = options.prefix ? options.prefix : '!';
@@ -193,6 +215,7 @@ class Whatsapp {
 				const content = JSON.stringify(chat.message);
 				const type = Object.keys(chat.message).find((v, i) => v !== 'messageContextInfo');
 				const messageTimestamp = chat.messageTimestamp;
+				const totalChat = this.store.chats.all();
 				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage.contextInfo.quotedMessage !== undefined ? chat.message.extendedTextMessage.contextInfo : null;
 				const quotedType = type === 'extendedTextMessage' && quotedInfo.quotedMessage !== null ? Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
@@ -306,6 +329,7 @@ class Whatsapp {
 					message,
 					content,
 					type,
+					totalChat,
 					quotedType,
 					prefix,
 					isMedia,

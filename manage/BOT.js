@@ -11,14 +11,13 @@ const { getDevice } = require('@adiwajshing/baileys');
 const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
 
 bot.listenQR(qr => {
-	// console.log(qr);
+	console.log(qr);
 })
 
 bot.listenMessage(async (receive) => {
 	console.log(receive);
 	// Reading Command
 	await readCommand(receive);
-	// console.log(receive);
 })
 
 bot.groupParticipantsUpdate((value) => {
@@ -62,7 +61,6 @@ const readCommand = async (receive) => {
 			})
 		})
 	})
-	// console.log(arrayCommand);
 	if (command === null || command === 'help') return;
 	if (command === 'menu') return await sendText(from, await menu(receive));
 
@@ -79,6 +77,7 @@ const buttonResponse = async (receive) => {
 	const { from, command, message, chat, user_id, isMedia } = receive;
 	const mimetypeAudio = getDevice(from) == 'ios' ? 'audio/mpeg' : 'audio/mp4';
 	const newCommand = command !== null ? command : String(message).toLocaleLowerCase();
+	// Yt Download response
 	if (!isMedia && newCommand === 'audio' && getMediaSession(user_id)) {
 		await reply(from, mess.wait, chat)
 		try {
@@ -113,6 +112,7 @@ const buttonResponse = async (receive) => {
 		}
 	}
 
+	// Tiktok response
 	if (!isMedia && newCommand === 'wm' && getMediaSession(user_id)) {
 		await reply(from, mess.wait, chat);
 		try {
