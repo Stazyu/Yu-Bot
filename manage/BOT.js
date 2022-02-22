@@ -11,7 +11,7 @@ const { getDevice } = require('@adiwajshing/baileys');
 const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
 
 bot.listenQR(qr => {
-	console.log(qr);
+	// console.log(qr);
 })
 
 bot.listenMessage(async (receive) => {
