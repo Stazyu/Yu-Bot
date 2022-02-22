@@ -15,7 +15,7 @@ bot.listenQR(qr => {
 })
 
 bot.listenMessage(async (receive) => {
-	console.log(receive);
+	// console.log(receive);
 	// Reading Command
 	await readCommand(receive);
 })
