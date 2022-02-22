@@ -57,7 +57,7 @@ class Whatsapp {
 		sock.ev.on('chats.set', () => {
 			// can use "store.chats" however you want, even after the socket dies out
 			// "chats" => a KeyedDB instance
-			console.log('got chats', store.chats.all())
+			// console.log('got chats', store.chats.all())
 		})
 
 		sock.ev.on('contacts.set', () => {
