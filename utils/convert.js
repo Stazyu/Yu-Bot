@@ -2,6 +2,10 @@ const fs = require('fs');
 const FormData = require('form-data');
 const { default: axios } = require('axios');
 const cheerio = require('cheerio');
+const { fromBuffer } = require('file-type');
+const path = require('path');
+const { randomString } = require('../helpers/generate');
+const { exec } = require('child_process');
 
 const webp2gifFile = (path) => {
     return new Promise((resolve, reject) => {
@@ -46,4 +50,45 @@ const webp2gifFile = (path) => {
     })
 }
 
-module.exports = { webp2gifFile }
+const upToTele = (buff) => {
+    return new Promise(async (resolve, reject) => {
+        const { ext } = await fromBuffer(buff)
+        const form = new FormData();
+        form.append('file', buff, 'tmp' + ext);
+        axios({
+            url: 'https://telegra.ph/upload',
+            method: 'post',
+            headers: {
+                'content-type': 'multipart/form-data; boundary=' + form.getBoundary()
+            },
+            data: form
+        })
+            .then((res) => {
+                const url = `https://telegra.ph${res.data[0].src}`;
+                resolve(url);
+                resolve(res);
+            }).catch((err) => {
+                reject(err);
+            });
+    })
+}
+
+const pngToWebpFromUrl = (url) => {
+    return new Promise(async (resolve, reject) => {
+        const filename = path.join(__dirname, '../temp', randomString(4, { extension: '.png' }));
+        const webp = path.join(__dirname, '../temp', randomString(4, { extension: '.webp' }));
+        const download = await axios.get(url, {
+            responseType: 'stream',
+        });
+        download.data.pipe(fs.createWriteStream(filename).on('close', () => {
+            // exec(`cwebp -q 60 ${filename} -o ${webp}`, (err) => {
+            exec(`ffmpeg -i ${filename} -vcodec libwebp -filter:v fps=fps=20 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 ${webp}`, (err) => {
+                if (err) return reject(err);
+                resolve(webp);
+                fs.unlinkSync(filename);
+            })
+        }))
+    })
+}
+
+module.exports = { webp2gifFile, upToTele, pngToWebpFromUrl }
