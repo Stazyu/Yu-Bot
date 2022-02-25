@@ -48,20 +48,21 @@ class Whatsapp {
 			this.qr = qr;
 			if (connection === 'close') {
 				const shouldReconnect = new Boom(lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
+				const reason = new Boom(lastDisconnect.error)?.output?.statusCode;
 				console.log('connection closed due to ', lastDisconnect.error.message, ', reconnecting ', shouldReconnect)
 				if (lastDisconnect.error.message === 'Stream Errored') {
 					this.logout(() => {
 						new Whatsapp(SESSION_DATA, options);
 					})
-				} else if (lastDisconnect.error.message === DisconnectReason.restartRequired) {
+				} else if (reason === DisconnectReason.restartRequired) {
 					new Whatsapp(SESSION_DATA, options);
-				} else if (lastDisconnect.error.message === DisconnectReason.timedOut) {
+				} else if (reason === DisconnectReason.timedOut) {
 					new Whatsapp(SESSION_DATA, options);
-				} else if (lastDisconnect.error.message === DisconnectReason.connectionClosed) {
+				} else if (reason === DisconnectReason.connectionClosed) {
 					new Whatsapp(SESSION_DATA, options);
-				} else if (lastDisconnect.error.message === DisconnectReason.connectionLost) {
+				} else if (reason === DisconnectReason.connectionLost) {
 					new Whatsapp(SESSION_DATA, options);
-				} else if (lastDisconnect.error.message === DisconnectReason.connectionReplaced) {
+				} else if (reason === DisconnectReason.connectionReplaced) {
 					new Whatsapp(SESSION_DATA, options);
 				}
 			} else if (connection === 'open') {
