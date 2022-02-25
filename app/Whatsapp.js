@@ -64,6 +64,8 @@ class Whatsapp {
 					new Whatsapp(SESSION_DATA, options);
 				} else if (reason === DisconnectReason.connectionReplaced) {
 					new Whatsapp(SESSION_DATA, options);
+				} else if (reason === DisconnectReason.loggedOut) {
+					new Whatsapp(SESSION_DATA, options);
 				}
 			} else if (connection === 'open') {
 				console.log('opened connection')
