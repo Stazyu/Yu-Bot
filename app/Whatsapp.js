@@ -75,7 +75,6 @@ class Whatsapp {
 		connection(sock);
 
 		this.sock = sock;
-		this.store = store;
 		this.SESSION_DATA = SESSION_DATA;
 		this.owner = ['6281578794887', '6283104500832'];
 		this.prefix = options.prefix ? options.prefix : '!';
@@ -197,7 +196,7 @@ class Whatsapp {
 				const content = JSON.stringify(chat.message);
 				const type = Object.keys(chat.message).find((v, i) => v !== 'messageContextInfo');
 				const messageTimestamp = chat.messageTimestamp;
-				const totalChat = this.store.chats.all();
+				// const totalChat = this.store.chats.all();
 				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage.contextInfo.quotedMessage !== null ? chat.message.extendedTextMessage.contextInfo : null;
 				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ? Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
