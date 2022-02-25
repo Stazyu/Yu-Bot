@@ -43,27 +43,6 @@ class Whatsapp {
 			// }
 		})
 
-		const store = makeInMemoryStore({})
-		// can be read from a file
-		store.readFromFile('./baileys_store.json')
-		// saves the state to a file every 10s
-		setInterval(() => {
-			store.writeToFile('./baileys_store.json')
-		}, 10_000)
-
-		// the store can listen from a new socket once the current socket outlives its lifetime
-		store.bind(sock.ev)
-
-		sock.ev.on('chats.set', () => {
-			// can use "store.chats" however you want, even after the socket dies out
-			// "chats" => a KeyedDB instance
-			// console.log('got chats', store.chats.all())
-		})
-
-		sock.ev.on('contacts.set', () => {
-			console.log('got contacts', Object.values(store.contacts))
-		})
-
 		sock.ev.on('connection.update', async (update) => {
 			const { connection, lastDisconnect, qr } = update
 			this.qr = qr;
@@ -74,14 +53,17 @@ class Whatsapp {
 					this.logout(() => {
 						new Whatsapp(SESSION_DATA, options);
 					})
-				} else if (lastDisconnect.error.message === 'Restart Required') {
+				} else if (lastDisconnect.error.message === DisconnectReason.restartRequired) {
 					new Whatsapp(SESSION_DATA, options);
-				} else if (lastDisconnect.error.message === 'Timed Out') {
-					new Whatsapp(SESSION_DATA, options)
+				} else if (lastDisconnect.error.message === DisconnectReason.timedOut) {
+					new Whatsapp(SESSION_DATA, options);
+				} else if (lastDisconnect.error.message === DisconnectReason.connectionClosed) {
+					new Whatsapp(SESSION_DATA, options);
+				} else if (lastDisconnect.error.message === DisconnectReason.connectionLost) {
+					new Whatsapp(SESSION_DATA, options);
+				} else if (lastDisconnect.error.message === DisconnectReason.connectionReplaced) {
+					new Whatsapp(SESSION_DATA, options);
 				}
-				// if (shouldReconnect) {// reconnect if not logged out
-				// 	new Whatsapp(SESSION_DATA, options);
-				// }
 			} else if (connection === 'open') {
 				console.log('opened connection')
 			}
