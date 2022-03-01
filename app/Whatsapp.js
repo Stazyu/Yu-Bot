@@ -217,7 +217,19 @@ class Whatsapp {
 				const runtime = this.secondsToDhms(run);
 				const time = moment().format('HH:mm:ss');
 				const date = moment().format('Do MMMM YYYY, h:mm:ss a');
-				const setting = await db.findSettingBot();
+				const setting = await db.findSettingBot().then(async (res) => {
+					const sett = res !== null ?
+						res :
+						db.insertSettingBot({
+							selfBot: false,
+							public: true,
+							maintenance: false,
+							chatRead: false,
+							type: "bot_setting",
+							prefix: "#"
+						})
+					return sett;
+				})
 
 				/* ============ Meta User & Owner ============ */
 				const user_idd = isGroup ? chat.key.participant : chat.key.remoteJid;
@@ -306,6 +318,7 @@ class Whatsapp {
 				} else if (time <= "23:59:00") {
 					ucapanWaktu = "Selamat Malam"
 				}
+
 
 				// Setting Self-Bot
 				if (fromMe && !setting.selfBot && command) return;
