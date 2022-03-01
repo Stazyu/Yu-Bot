@@ -194,7 +194,7 @@ class Whatsapp {
 				let chat = msg.messages[0];
 
 				if (msg.type !== 'notify') return;
-				if (chat.key && chat.key.fromMe || chat.key.remoteJid === 'status@broadcast') return;
+				if (chat.key.remoteJid === 'status@broadcast') return;
 				/* ========== Meta Utama ========== */
 				// if (chat.message.protocolMessage !== undefined)
 				if (!chat.message || chat?.message?.senderKeyDistributionMessage || chat?.message?.protocolMessage) return;
