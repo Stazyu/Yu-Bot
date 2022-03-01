@@ -1,35 +1,70 @@
 /* 1st modules  */
 const { readFileSync, readdirSync } = require('fs');
 const path = require('path')
+const { Boom } = require("@hapi/boom")
 
 const Whatsapp = require('../app/Whatsapp');
 const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia } = require('../lib/functions');
 const { getMediaSession, resetMediaSession } = require('../utils/sessionMedia');
 const { mess, menu } = require('../lib/help');
-const { getDevice } = require('@adiwajshing/baileys');
+const { getDevice, DisconnectReason } = require('@adiwajshing/baileys');
 
-const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
+const waBot = () => {
+	const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
+	bot.sock.ev.on('connection.update', async (update) => {
+		const { connection, lastDisconnect, qr } = update
+		if (connection === 'close') {
+			const shouldReconnect = new Boom(lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
+			console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
+			// reconnect if not logged out
+			if (shouldReconnect) {
+				const bott = waBot();
+				return bott;
+			}
+		} else if (connection === 'open') {
+			console.log('opened connection')
+		}
+	});
 
-bot.listenQR(qr => {
-	// console.log(qr);
-})
+	bot.listenQR(qr => {
+		// console.log(qr);
+	})
 
-bot.listenMessage(async (receive) => {
-	// console.log(receive);
-	// Reading Command
-	await readCommand(receive);
-})
+	bot.listenMessage(async (receive) => {
+		// console.log(receive);
+		// Reading Command
+		await readCommand(receive, bot);
+	})
 
-bot.groupParticipantsUpdate((value) => {
-	console.log('Update Group');
-	console.log(value);
-})
+	bot.groupParticipantsUpdate((value) => {
+		console.log('Update Group');
+		console.log(value);
+	})
+	return bot;
+}
+waBot();
+
+// bot.listenQR(qr => {
+// 	// console.log(qr);
+// })
+
+// bot.listenMessage(async (receive) => {
+// 	// console.log(receive);
+// 	// Reading Command
+// 	await readCommand(receive);
+// })
+
+// bot.groupParticipantsUpdate((value) => {
+// 	console.log('Update Group');
+// 	console.log(value);
+// })
+
 
 /**
  * 
  * @param {} receive Result Message yang udah di filter
  */
-const readCommand = async (receive) => {
+const readCommand = async (receive, bot) => {
 	const { chat, from, isOwner, isGroupAdmin, command, prefix, args, isButtonResponseMessage } = receive;
 	const dir = readdirSync(path.join(__dirname, '../lib/command'));
 	// Print log in terminal

@@ -1,1 +1,2 @@
-require('./manage/BOT')
+require('./manage/BOT');
+require('./database/connection/mongodb');

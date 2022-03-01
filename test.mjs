@@ -64,6 +64,18 @@ import axios from "axios";
 //     .then(res => console.log(res))
 //     .catch(err => console.log(err));
 
-const linkWA = 'https://chat.whatsapp.com/EpORycw6ahzJBPxUHpCmzu'
-const reg = /(?:http(?:s|):\/\/|)chat.whatsapp.com\/([-_0-9A-Za-z]{10,25})/gi.exec(linkWA);
-console.log(reg[1]);
+// const linkWA = 'https://chat.whatsapp.com/EpORycw6ahzJBPxUHpCmzu'
+// const reg = /(?:http(?:s|):\/\/|)chat.whatsapp.com\/([-_0-9A-Za-z]{10,25})/gi.exec(linkWA);
+// console.log(reg[1]);
+
+// const FormData = require('form-data');
+// const form = new FormData();
+// form.append('file',)
+
+// axios({
+//     url: 'https://telegra.ph/upload',
+//     method: 'post',
+//     headers: {
+
+//     }
+// })

@@ -20,6 +20,8 @@ moment.locale('id')
 
 const { connection } = require('../lib/functions');
 const { color } = require('../utils/color');
+const ModelDb = require('../models/index');
+const db = new ModelDb();
 
 class Whatsapp {
 	/**
@@ -30,6 +32,7 @@ class Whatsapp {
 	constructor(SESSION_DATA, options = {}) {
 		// Save Auth Multi Device
 		const { state, saveState } = useSingleFileAuthState(SESSION_DATA);
+
 		const sock = WASocket({
 			logger: P({ level: 'info' }, pretty({ colorize: true })),
 			version: [2, 2204, 13],
@@ -43,36 +46,40 @@ class Whatsapp {
 			// }
 		})
 
-		sock.ev.on('connection.update', async (update) => {
-			const { connection, lastDisconnect, qr } = update
-			this.qr = qr;
-			if (connection === 'close') {
-				const shouldReconnect = new Boom(lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
-				const reason = new Boom(lastDisconnect.error)?.output?.statusCode;
-				console.log('connection closed due to ', lastDisconnect.error.message, ', reconnecting ', shouldReconnect)
-				if (lastDisconnect.error.message === 'Stream Errored') {
-					this.logout(() => {
-						new Whatsapp(SESSION_DATA, options);
-					})
-				} else if (reason === DisconnectReason.restartRequired) {
-					new Whatsapp(SESSION_DATA, options);
-				} else if (reason === DisconnectReason.timedOut) {
-					new Whatsapp(SESSION_DATA, options);
-				} else if (reason === DisconnectReason.connectionClosed) {
-					new Whatsapp(SESSION_DATA, options);
-				} else if (reason === DisconnectReason.connectionLost) {
-					new Whatsapp(SESSION_DATA, options);
-				} else if (reason === DisconnectReason.connectionReplaced) {
-					new Whatsapp(SESSION_DATA, options);
-				} else if (reason === DisconnectReason.loggedOut) {
-					this.logout(() => {
-						new Whatsapp(SESSION_DATA, options);
-					})
-				}
-			} else if (connection === 'open') {
-				console.log('opened connection')
-			}
-		})
+		// sock.ev.on('connection.update', async (update) => {
+		// 	const { connection, lastDisconnect, qr } = update
+		// 	this.qr = qr;
+		// 	if (connection === 'close') {
+		// 		const shouldReconnect = new Boom(lastDisconnect.error)?.output?.statusCode !== DisconnectReason.loggedOut
+		// 		const reason = new Boom(lastDisconnect.error)?.output?.statusCode;
+		// 		console.log('connection closed due to ', lastDisconnect.error.message, ', reconnecting ', shouldReconnect)
+		// 		if (lastDisconnect.error.message === 'Stream Errored') {
+		// 			this.logout(() => {
+		// 				new Whatsapp(SESSION_DATA, options);
+		// 			})
+		// 		}
+		// 		// else if (reason === DisconnectReason.restartRequired) {
+		// 		// 	new Whatsapp(SESSION_DATA, options);
+		// 		// } else if (reason === DisconnectReason.timedOut) {
+		// 		// 	new Whatsapp(SESSION_DATA, options);
+		// 		// } else if (reason === DisconnectReason.connectionClosed) {
+		// 		// 	new Whatsapp(SESSION_DATA, options);
+		// 		// } else if (reason === DisconnectReason.connectionLost) {
+		// 		// 	new Whatsapp(SESSION_DATA, options);
+		// 		// } else if (reason === DisconnectReason.connectionReplaced) {
+		// 		// 	new Whatsapp(SESSION_DATA, options);
+		// 		// } else if (reason === DisconnectReason.loggedOut) {
+		// 		// 	this.logout(() => {
+		// 		// 		new Whatsapp(SESSION_DATA, options);
+		// 		// 	})
+		// 		// }
+		// 		if (shouldReconnect) {
+		// 			new Whatsapp(SESSION_DATA, options);
+		// 		}
+		// 	} else if (connection === 'open') {
+		// 		console.log('opened connection')
+		// 	}
+		// })
 		sock.ev.on('creds.update', (auth) => {
 			console.log(auth);
 			saveState();
@@ -84,7 +91,6 @@ class Whatsapp {
 		this.owner = ['6281578794887', '6283104500832'];
 		this.prefix = options.prefix ? options.prefix : '!';
 		// this.date = moment().format('LLLL');
-		this.date = moment().format('Do MMMM YYYY, h:mm:ss a');
 	}
 
 	logout(onSuccess) {
@@ -210,11 +216,13 @@ class Whatsapp {
 				const run = process.uptime();
 				const runtime = this.secondsToDhms(run);
 				const time = moment().format('HH:mm:ss');
+				const date = moment().format('Do MMMM YYYY, h:mm:ss a');
+				const setting = await db.findSettingBot();
 
 				/* ============ Meta User & Owner ============ */
 				const user_idd = isGroup ? chat.key.participant : chat.key.remoteJid;
 				const user_id = /([0-9]{12,14})/gi.exec(user_idd)[0] + '@s.whatsapp.net';
-				const pushname = chat.pushName;
+				const pushName = chat.pushName;
 				const ownerNumber = this.owner.map((nomor, i) => {
 					return this.formatter(nomor, "@s.whatsapp.net");
 				})
@@ -232,7 +240,7 @@ class Whatsapp {
 				const isBotGroupAdmin = groupAdmins.includes(botNumber);
 				const isGroupAdmin = groupAdmins.includes(user_id);
 
-				if (true) {
+				if (setting.chatRead) {
 					await this.sock.sendReceipt(from, participant, [id], 'read');
 				}
 
@@ -269,6 +277,7 @@ class Whatsapp {
 								chat.message.videoMessage.caption : null;
 				message = String(message).startsWith(this.prefix) ? null : message
 
+				/* Message Command */
 				const command = message_button !== null
 					? message_button.toLowerCase()
 					: message_prefix !== null
@@ -282,6 +291,7 @@ class Whatsapp {
 					? message.startsWith(this.prefix)
 					: message_prefix !== null ? message_prefix.startsWith(this.prefix) : false;
 
+				/* Ucapan Waktu */
 				let ucapanWaktu = ''
 				if (time <= "03:30:00") {
 					ucapanWaktu = 'Selamat Malam'
@@ -297,6 +307,37 @@ class Whatsapp {
 					ucapanWaktu = "Selamat Malam"
 				}
 
+				// Setting Self-Bot
+				if (fromMe && !setting.selfBot && command) return;
+				// Setting Public Bot
+				if (!isOwner && !fromMe && !setting.public && command) return;
+				// Setting Maintenance Bot
+				if (!isOwner && !fromMe && setting.maintenance && command) {
+					return this.sock.sendMessage(from, { text: 'Mohon Maaf.. Saat ini bot sedang dalam Pemeliharaan/Maintenance🛠️' })
+				}
+
+				const isVerify = isGroup ?
+					await db.findOneGroup({ group_id: groupId }).then(v => v.group_id === groupId).catch(err => undefined) :
+					await db.findOneUser({ user_id }).then(v => v.user_id === user_id).catch(err => undefined);
+				if (!isVerify && isGroup) {
+					await db.insertOneGroup({
+						group_id: groupId,
+						group_name: groupName,
+						urlpp: await this.sock.profilePictureUrl(from, 'image'),
+						join_time: Date.now(),
+						verify: true
+					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(groupName, 'green'), color('FROM', 'white'), color(groupName, 'yellow')));
+				} else if (!isVerify && !isGroup) {
+					await db.insertOneUser({
+						user_id: user_id,
+						user_name: pushName,
+						urlpp: await this.sock.profilePictureUrl(from, 'image'),
+						limit: 40,
+						join_time: Date.now(),
+						verify: true
+					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color('=>', 'white'), color('NAME', 'white'), color(pushName, 'green'), color('FROM', 'white'), color(pushName, 'yellow')));
+				}
+
 				receive({
 					chat,
 					chatMessage,
@@ -309,7 +350,7 @@ class Whatsapp {
 					mentionedJid,
 					botNumber,
 					runtime,
-					pushname,
+					pushName,
 					message_prefix,
 					message,
 					content,
@@ -350,6 +391,7 @@ class Whatsapp {
 					// 
 					ucapanWaktu,
 					time,
+					date
 				})
 			} catch (err) {
 				console.log(err);
@@ -357,11 +399,11 @@ class Whatsapp {
 		})
 	}
 	printLog(msg) {
-		const { isCmd, message, command, groupName, isGroup, isMedia, isImage, isVideo, isDocument, isAudio, isSticker, user_id } = msg
-		if (!isCmd && isGroup && !isMedia && !isSticker && !command) console.log(color(`[GROUP || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${this.date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
-		if (!isCmd && !isGroup && !isMedia && !isSticker && !command) console.log(color(`[PRIVATE || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${this.date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
-		if (isCmd && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || CMD]`), color('=>', 'white'), color(`DATE: ${this.date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
-		if (isCmd && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || CMD]`), color('=>', 'white'), color(`DATE: ${this.date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
+		const { date, isCmd, message, command, groupName, isGroup, isMedia, isImage, isVideo, isDocument, isAudio, isSticker, user_id } = msg
+		if (!isCmd && isGroup && !isMedia && !isSticker && !command) console.log(color(`[GROUP || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
+		if (!isCmd && !isGroup && !isMedia && !isSticker && !command) console.log(color(`[PRIVATE || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
+		if (isCmd && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
+		if (isCmd && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
 	}
 }
 
