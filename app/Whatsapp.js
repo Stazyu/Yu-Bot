@@ -333,22 +333,34 @@ class Whatsapp {
 					await db.findOneGroup({ group_id: groupId }).then(v => v.group_id === groupId).catch(err => undefined) :
 					await db.findOneUser({ user_id }).then(v => v.user_id === user_id).catch(err => undefined);
 				if (!isVerify && isGroup) {
+					let ppWa = null;
+					try {
+						ppWa = await this.sock.profilePictureUrl(from, 'image');
+					} catch {
+						ppWa = null;
+					}
 					await db.insertOneGroup({
 						group_id: groupId,
 						group_name: groupName,
-						urlpp: await this.sock.profilePictureUrl(from, 'image'),
+						urlpp: ppWa,
 						join_time: Date.now(),
 						verify: true
 					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(groupName, 'green'), color('FROM', 'white'), color(groupName, 'yellow')));
 				} else if (!isVerify && !isGroup) {
+					let ppWa = null;
+					try {
+						ppWa = await this.sock.profilePictureUrl(from, 'image');
+					} catch {
+						ppWa = null;
+					}
 					await db.insertOneUser({
 						user_id: user_id,
 						user_name: pushName,
-						urlpp: await this.sock.profilePictureUrl(from, 'image'),
+						urlpp: ppWa,
 						limit: 40,
 						join_time: Date.now(),
 						verify: true
-					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color('=>', 'white'), color('NAME', 'white'), color(pushName, 'green'), color('FROM', 'white'), color(pushName, 'yellow')));
+					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color('=>', 'white'), color('NAME', 'white'), color(pushName, 'green'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow')));
 				}
 
 				receive({
