@@ -219,7 +219,7 @@ async function pinterest(query) {
 function tiktokDl(url) {
     return new Promise(async (resolve, reject) => {
         url = (await fetch(url)).url
-        const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{5,15})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
+        const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
         const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`
         const { data } = await axios.get(urlTik, {
             headers: {
