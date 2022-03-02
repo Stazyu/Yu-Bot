@@ -208,7 +208,7 @@ class Whatsapp {
 				const type = Object.keys(chat.message).find((v, i) => v !== 'messageContextInfo');
 				const messageTimestamp = chat.messageTimestamp;
 				// const totalChat = this.store.chats.all();
-				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage.contextInfo !== null ? chat.message.extendedTextMessage.contextInfo : null;
+				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.quotedMessage !== null ? chat.message.extendedTextMessage.contextInfo : null;
 				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ? Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
 				const mentionedJid = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.mentionedJid !== [] ? chat.message.extendedTextMessage?.contextInfo?.mentionedJid : []

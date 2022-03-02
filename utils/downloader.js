@@ -173,47 +173,112 @@ async function pinterest(query) {
 // 	});
 // }
 
+// function tiktokDl(url) {
+//     return new Promise(async (resolve, reject) => {
+//         const urlTik = await fetch(url).then(res => res.url).catch(err => undefined)
+//         if (urlTik === undefined) return reject(new Error('Link tidak valid!'))
+//         axios({
+//             url: `https://api.snaptik.site/video-key?video_url=${urlTik}`,
+//             method: 'GET',
+//             headers: {
+//                 accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+//                 'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+//             }
+//         })
+//             .then(({ data }) => {
+//                 if (data.status !== 'success') throw new Error('Gagal Mendapatkan key')
+//                 console.log(data);
+//                 axios({
+//                     url: `https://api.snaptik.site/video-details-by-key?key=${data.data.key}`,
+//                     method: 'GET',
+//                     headers: {
+//                         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+//                         'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36'
+//                     }
+//                 })
+//                     .then(res => {
+//                         const result = {
+//                             status: res.data.status,
+//                             author: res.data.data.author,
+//                             description: res.data.data.description,
+//                             video: {
+//                                 with_wm: `https://api.snaptik.site/download?key=${res.data.data.video.with_watermark}&type=video`,
+//                                 no_wm: `https://api.snaptik.site/download?key=${res.data.data.video.no_watermark}&type=video`,
+//                                 no_watermark_raw: res.data.data.video.no_watermark_raw,
+//                             },
+//                             music: `https://api.snaptik.site/download?key=${res.data.data.music}&type=music`
+//                         }
+//                         resolve(result);
+//                     })
+//                     .catch(err => reject(err))
+//             })
+//             .catch(err => reject(err))
+//     });
+// }
+
 function tiktokDl(url) {
     return new Promise(async (resolve, reject) => {
-        const urlTik = await fetch(url).then(res => res.url).catch(err => undefined)
-        if (urlTik === undefined) return reject(new Error('Link tidak valid!'))
-        axios({
-            url: `https://api.snaptik.site/video-key?video_url=${urlTik}`,
-            method: 'GET',
+        url = (await fetch(url)).url
+        const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. 0-9 A-Z a-z]{5,15})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url)
+        const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`
+        const { data } = await axios.get(urlTik, {
             headers: {
-                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                'user-agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             }
+        });
+        axios.get('https://tikdown.org/id', {
+            headers: {
+                cookie: 'XSRF-TOKEN=eyJpdiI6ImVNVVJtcHVwcGJJWnM3L1hTVnJZWmc9PSIsInZhbHVlIjoiM2p2T29TMGRKSlE0VGxkZFpPZ0RPZE43QncvYThONWlCYnppSDNBQXlWMlNoMk42N1VkTGwzQkNTNGZjM3h0Z09YOUV6eDloY2dGaC92aTdqczNLMzdwWjVobjA0NVU5aXlwbUpNL1NVbm1XNVhEUzUyL3VjMzRJWnZ6Z28rZHEiLCJtYWMiOiIyYTk2YTkxZGY5MjhmZDZmYTczNmIyOWJiZmY3MTZjNjJiNTBlOTZkNzRiNjI4OGJjNjQ0Y2E3ZDAwZGRmMGExIn0%3D; laravel_session=eyJpdiI6IkNjMDE0ZzNLSXR3UlFLZDMreTdueUE9PSIsInZhbHVlIjoiN0poS1hiUTBrdzQ2WGhIMkFlQmdPVWt6a3hsRUVvTzBFWHBVY3didXB5Uit6akVEY3ZtMnlqY1JkWUZBT0RRV09vUHRpMndjZFJISVRnY2NyajN2dWRETk1wcWljSHlmRS9pRWV1Z3l1alBuT3NhUzRnL2V0aVFFVmVGcUZyWlQiLCJtYWMiOiI1ODhjMWQ5YjY1YzQ2MTM4Zjg1ZWQ0OTUzN2QwODc0NGYxYjY1NWNiMjRlNTc2ODY1YzhiOWUwOWU3MDA0MDZhIn0%3D',
+                referer: 'https://tikdown.org/id',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+            },
         })
-            .then(({ data }) => {
-                if (data.status !== 'success') throw new Error('Gagal Mendapatkan key')
-                console.log(data);
-                axios({
-                    url: `https://api.snaptik.site/video-details-by-key?key=${data.data.key}`,
-                    method: 'GET',
+            .then((res) => {
+                const $ = cheerio.load(res.data);
+                const token = $('input[name="_token"]').attr('value');
+                axios.get(`https://tikdown.org/getAjax?url=https://www.tiktok.com/${regTik[1]}/video/${regTik[3]}&_token=${token}`, {
                     headers: {
+                        cookie: 'XSRF-TOKEN=eyJpdiI6ImVNVVJtcHVwcGJJWnM3L1hTVnJZWmc9PSIsInZhbHVlIjoiM2p2T29TMGRKSlE0VGxkZFpPZ0RPZE43QncvYThONWlCYnppSDNBQXlWMlNoMk42N1VkTGwzQkNTNGZjM3h0Z09YOUV6eDloY2dGaC92aTdqczNLMzdwWjVobjA0NVU5aXlwbUpNL1NVbm1XNVhEUzUyL3VjMzRJWnZ6Z28rZHEiLCJtYWMiOiIyYTk2YTkxZGY5MjhmZDZmYTczNmIyOWJiZmY3MTZjNjJiNTBlOTZkNzRiNjI4OGJjNjQ0Y2E3ZDAwZGRmMGExIn0%3D; laravel_session=eyJpdiI6IkNjMDE0ZzNLSXR3UlFLZDMreTdueUE9PSIsInZhbHVlIjoiN0poS1hiUTBrdzQ2WGhIMkFlQmdPVWt6a3hsRUVvTzBFWHBVY3didXB5Uit6akVEY3ZtMnlqY1JkWUZBT0RRV09vUHRpMndjZFJISVRnY2NyajN2dWRETk1wcWljSHlmRS9pRWV1Z3l1alBuT3NhUzRnL2V0aVFFVmVGcUZyWlQiLCJtYWMiOiI1ODhjMWQ5YjY1YzQ2MTM4Zjg1ZWQ0OTUzN2QwODc0NGYxYjY1NWNiMjRlNTc2ODY1YzhiOWUwOWU3MDA0MDZhIn0%3D',
+                        referer: 'https://tikdown.org/id',
+                        'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
                         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                        'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Mobile Safari/537.36'
+                        'content-type': 'text/html; charset=UTF-8'
                     }
                 })
-                    .then(res => {
+                    .then((res) => {
+                        const $ = cheerio.load(res.data.html)
                         const result = {
-                            status: res.data.status,
-                            author: res.data.data.author,
-                            description: res.data.data.description,
-                            video: {
-                                with_wm: `https://api.snaptik.site/download?key=${res.data.data.video.with_watermark}&type=video`,
-                                no_wm: `https://api.snaptik.site/download?key=${res.data.data.video.no_watermark}&type=video`,
-                                no_watermark_raw: res.data.data.video.no_watermark_raw,
+                            info: {
+                                nickname: data.itemInfo.itemStruct.author.nickname,
+                                username: '@' + data.itemInfo.itemStruct.author.uniqueId,
+                                desc: data.itemInfo.itemStruct.desc,
+                                created: new Date(data.itemInfo.itemStruct.createTime * 1000).toLocaleDateString('id'),
+                                image: $('img').attr('src'),
                             },
-                            music: `https://api.snaptik.site/download?key=${res.data.data.music}&type=music`
+                            media: {
+                                wm: data.itemInfo.itemStruct.video.downloadAddr,
+                                nowm: null,
+                                music: data.itemInfo.itemStruct.music.playUrl,
+                                music2: null
+                            },
                         }
+                        $('div.download-links').find('a').each((i, e) => {
+                            if ($(e).attr('href').endsWith('mp4')) {
+                                result.media.nowm = $(e).attr('href');
+                            } else {
+                                result.media.music2 = $(e).attr('href');
+                            }
+                        })
                         resolve(result);
-                    })
-                    .catch(err => reject(err))
-            })
-            .catch(err => reject(err))
-    });
+                    }).catch((err) => {
+                        reject(err);
+                    });
+            }).catch((err) => {
+                reject(err);
+            });
+    })
 }
 
 function igDownloader(url) {
