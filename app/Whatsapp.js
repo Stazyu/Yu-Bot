@@ -23,6 +23,15 @@ const { color } = require('../utils/color');
 const ModelDb = require('../models/index');
 const db = new ModelDb();
 
+// Save Message
+const store = makeInMemoryStore({})
+// can be read from a file
+store.readFromFile('./baileys_store.json')
+// saves the state to a file every 10s
+setInterval(() => {
+	store.writeToFile('./baileys_store.json')
+}, 10_000)
+
 class Whatsapp {
 	/**
 	 * 
@@ -45,6 +54,7 @@ class Whatsapp {
 			// 	}
 			// }
 		})
+		store.bind(sock.ev)
 
 		// sock.ev.on('connection.update', async (update) => {
 		// 	const { connection, lastDisconnect, qr } = update
@@ -81,7 +91,6 @@ class Whatsapp {
 		// 	}
 		// })
 		sock.ev.on('creds.update', (auth) => {
-			console.log(auth);
 			saveState();
 		})
 		connection(sock);
@@ -207,7 +216,7 @@ class Whatsapp {
 				const content = JSON.stringify(chat.message);
 				const type = Object.keys(chat.message).find((v, i) => v !== 'messageContextInfo');
 				const messageTimestamp = chat.messageTimestamp;
-				// const totalChat = this.store.chats.all();
+				const totalChat = store.chats.all();
 				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.quotedMessage !== null ? chat.message.extendedTextMessage.contextInfo : null;
 				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ? Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
@@ -380,7 +389,7 @@ class Whatsapp {
 					message,
 					content,
 					type,
-					// totalChat,
+					totalChat,
 					quotedType,
 					prefix,
 					isMedia,
