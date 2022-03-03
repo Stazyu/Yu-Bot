@@ -338,10 +338,11 @@ class Whatsapp {
 					return this.sock.sendMessage(from, { text: 'Mohon Maaf.. Saat ini bot sedang dalam Pemeliharaan/Maintenance🛠️' })
 				}
 
+				// Auto Verify
 				const isVerify = isGroup ?
 					await db.findOneGroup({ group_id: groupId }).then(v => v.group_id === groupId).catch(err => undefined) :
 					await db.findOneUser({ user_id }).then(v => v.user_id === user_id).catch(err => undefined);
-				if (!isVerify && isGroup) {
+				if (!isVerify && isGroup && isCmd) {
 					let ppWa = null;
 					try {
 						ppWa = await this.sock.profilePictureUrl(from, 'image');
@@ -355,7 +356,7 @@ class Whatsapp {
 						join_time: Date.now(),
 						verify: true
 					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(groupName, 'green'), color('FROM', 'white'), color(groupName, 'yellow')));
-				} else if (!isVerify && !isGroup) {
+				} else if (!isVerify && !isGroup && isCmd) {
 					let ppWa = null;
 					try {
 						ppWa = await this.sock.profilePictureUrl(from, 'image');
