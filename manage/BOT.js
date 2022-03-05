@@ -20,6 +20,11 @@ const waBot = () => {
 			if (shouldReconnect) {
 				const bott = waBot();
 				return bott;
+			} else {
+				console.log('Silahkan Scan Ulang!');
+				bot.logout(() => {
+					process.exit(1);
+				})
 			}
 		} else if (connection === 'open') {
 			console.log('opened connection')

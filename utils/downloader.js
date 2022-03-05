@@ -73,7 +73,7 @@ async function ytdDownload(url) {
         axios.post('https://yt1s.com/api/ajaxSearch/index', qs.stringify(config.data), { headers: config.headers })
             .then(async (res) => {
                 const mp4Result = Object.values(res.data.links.mp4).find((i) => {
-                    return i.q === '720p' ? i.q === '720p' : i.q === '480p'
+                    return i.q === '720p' ? i.q === '720p' : i.q === '360p'
                 })
                 const formMp3128Kbps = {
                     vid: res.data.vid,
@@ -143,7 +143,7 @@ async function pinterest(query) {
             })
             hasil.shift();
             resolve(hasil)
-        })
+        }).catch(err => reject(err));
     })
 }
 
@@ -314,6 +314,50 @@ function igDownloader(url) {
     });
 }
 
+const fbDownloader = async (url) => {
+    return new Promise((resolve, reject) => {
+        axios.get('https://fdownloader.net/id', {
+            headers: {
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                cookie: '.AspNetCore.Antiforgery.xskahbNOLhA=CfDJ8AyBv3EaZnFHivhSKLY2g5NwEmiJsmwg942PDSrP2bunDbZ2JspA4eZ5wYi4cp3AShfTFgVAhbWLWSPyFklwGy_6ni1YP0UAKQQ7VBgppW105cd0as4ixOTwKzGqzWl3XJxdW5CfqXqC-VdcWiBeR8I',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36'
+            }
+        }).then((res) => {
+            const $ = cheerio.load(res.data);
+            const token = $('input[name="__RequestVerificationToken"]').attr('value');
+            const config = {
+                headers: {
+                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    cookie: '.AspNetCore.Antiforgery.xskahbNOLhA=CfDJ8AyBv3EaZnFHivhSKLY2g5NwEmiJsmwg942PDSrP2bunDbZ2JspA4eZ5wYi4cp3AShfTFgVAhbWLWSPyFklwGy_6ni1YP0UAKQQ7VBgppW105cd0as4ixOTwKzGqzWl3XJxdW5CfqXqC-VdcWiBeR8I',
+                    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36'
+                },
+                data: {
+                    __RequestVerificationToken: token,
+                    q: url
+                }
+            }
+            axios.post('https://fdownloader.net/api/ajaxSearch', qs.stringify(config.data), { headers: config.headers })
+                .then((res) => {
+                    let result = {
+                        hd: null,
+                        sd: null,
+                        duration: null,
+                    }
+                    if (res.data.status !== 'ok') return new Error('Gagal mendapatkan link!!')
+                    const $$ = cheerio.load(res.data.data);
+                    result.hd = $$('#fbdownloader > div.tab-wrap > div:nth-child(5) > table > tbody > tr:nth-child(1) > td:nth-child(3) > a').attr('href');
+                    result.sd = $$('#fbdownloader > div.tab-wrap > div:nth-child(5) > table > tbody > tr:nth-child(2) > td:nth-child(3) > a').attr('href');
+                    result.duration = $$('#search-result > div.detail > div.thumbnail > div.content > div').find('p').text();
+                    resolve(result);
+                }).catch((err) => {
+                    reject(err);
+                });
+        }).catch((err) => {
+            reject(err);
+        });
+    })
+}
+
 // function ytdDownload(url) {
 // 	return new Promise((resolve, reject) => {
 // 		axios.request({
@@ -364,7 +408,7 @@ function igDownloader(url) {
 // }
 
 module.exports = {
-    facebook: downloader,
+    facebook: fbDownloader,
     instagram: downloader,
     instagram2: igDownloader,
     tiktok: downloader,
