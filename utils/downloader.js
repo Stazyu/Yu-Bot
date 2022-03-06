@@ -220,7 +220,8 @@ function tiktokDl(url) {
     return new Promise(async (resolve, reject) => {
         url = (await fetch(url)).url
         const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
-        const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`
+        if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
+        const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
         const { data } = await axios.get(urlTik, {
             headers: {
                 'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
