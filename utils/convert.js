@@ -91,4 +91,23 @@ const pngToWebpFromUrl = (url) => {
     })
 }
 
-module.exports = { webp2gifFile, upToTele, pngToWebpFromUrl }
+const pngToWebpFromBuffer = (buffer) => {
+    return new Promise(async (resolve, reject) => {
+        const filename = path.join(__dirname, '../temp', randomString(4, { extension: '.png' }));
+        const webp = path.join(__dirname, '../temp', randomString(4, { extension: '.webp' }));
+        fs.writeFile(filename, buffer, (err) => {
+            if (err) return reject(err);
+            // exec(`cwebp -q 60 ${filename} -o ${webp}`, (err) => {
+            exec(`ffmpeg -i ${filename} -vcodec libwebp -filter:v fps=fps=20 -lossless 1 -loop 0 -preset default -an -vsync 0 -s 512:512 ${webp}`, (err) => {
+                if (err) return reject(err);
+                resolve(webp);
+                fs.unlinkSync(filename);
+                setTimeout(() => {
+                    fs.unlinkSync(webp);
+                }, 10000);
+            })
+        })
+    })
+}
+
+module.exports = { webp2gifFile, upToTele, pngToWebpFromUrl, pngToWebpFromBuffer }

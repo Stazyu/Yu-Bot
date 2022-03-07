@@ -3,6 +3,7 @@ const { default: axios } = require('axios')
 const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 const ytdlcore = require('ytdl-core')
 const qs = require('qs')
+const { NodeVM } = require('vm2');
 
 function secondToFormatClock(s) {
     return (s - (s %= 60)) / 60 + (9 < s ? ':' : ':0') + s
@@ -282,9 +283,16 @@ function tiktokDl(url) {
     })
 }
 
+/**
+ * It takes a URL, and returns a Promise that resolves to an object containing the image URL and the
+ * download links
+ * @param url - The URL of the Instagram post you want to download.
+ * @returns an object with two properties: image and link.
+ */
 function igDownloader(url) {
     return new Promise((resolve, reject) => {
         const arrayLink = {
+            image: null,
             link: []
         }
         const config = {
@@ -299,15 +307,21 @@ function igDownloader(url) {
             }
         }
         axios.post('https://snapinsta.app/action.php', qs.stringify(config.data), config.headers)
-            .then((res) => {
-                const $ = cheerio.load(res.data);
-                $('div.download-items').each(function (a, b) {
+            .then(({ data }) => {
+                const result = new NodeVM({
+                    'compiler': 'javascript',
+                    'console': 'inherit',
+                }).run(/<script>(.*)<\/script>/g.exec(data)?.[1].replace('eval', '').replace(/\(function(.)?\(h/gi, 'module.exports = (function (h')).split(/innerHTML = \"/)[1].split(/"\; parent/)[0].replace(/\\/g, '');
+                const $ = cheerio.load(result);
+                $('div.download-items').each((a, b) => {
                     if ($(b).find('a').attr('href').includes('dl.php')) {
                         arrayLink.link.push('https://snapinsta.app' + $(b).find('a').attr('href'))
                     } else {
                         arrayLink.link.push($(b).find('a').attr('href'))
                     }
                 })
+                const image = $('img').attr('src');
+                arrayLink.image = 'https://snapinsta.app' + image;
                 resolve(arrayLink);
             }).catch((err) => {
                 reject(err);
