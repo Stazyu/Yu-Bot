@@ -377,6 +377,34 @@ const fbDownloader = async (url) => {
     })
 }
 
+const igStalk = (username) => {
+    return new Promise((resolve, reject) => {
+        if (String(username).startsWith('@')) {
+            username = username.slice(1);
+        }
+        axios.get(`https://www.instagram.com/jakarta.keras/?__a=1`)
+            .then(({ data }) => {
+                const ig = data.graphql.user;
+                const resultIG = {
+                    username: '@' + ig.username,
+                    full_name: ig.full_name,
+                    biography: ig.biography,
+                    followers: ig.edge_followed_by.count,
+                    following: ig.edge_follow.count,
+                    is_private: ig.is_private,
+                    is_verified: ig.is_verified,
+                    country_block: ig.country_block,
+                    external_url: ig.external_url,
+                    profile_pic_url: ig.profile_pic_url,
+                    profile_pic_url_hd: ig.profile_pic_url_hd
+                }
+                resolve(resultIG);
+            }).catch((err) => {
+                reject(err);
+            });
+    })
+}
+
 // function ytdDownload(url) {
 // 	return new Promise((resolve, reject) => {
 // 		axios.request({
@@ -430,6 +458,7 @@ module.exports = {
     facebook: fbDownloader,
     instagram: downloader,
     instagram2: igDownloader,
+    igStalk,
     tiktok: downloader,
     tiktokDl: tiktokDl,
     kwai: downloader,

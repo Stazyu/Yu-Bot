@@ -122,6 +122,7 @@ const buttonResponse = async (receive) => {
 		await reply(from, mess.wait, chat)
 		try {
 			const resultMedia = getMediaSession(user_id)
+			if (resultMedia.type !== 'ytdl') return;
 			if (resultMedia.sizeMp3 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp3}`)
 			resetMediaSession(user_id, 'ytdl')
 			await sendAudio(from, resultMedia.urlMp3, { mimetype: mimetypeAudio })
@@ -182,6 +183,29 @@ const buttonResponse = async (receive) => {
 		} catch (err) {
 			console.error(err);
 			sendText(from, mess.error.link);
+		}
+	}
+
+	if (!isMedia && newCommand === 'audioquran' && getMediaSession(user_id)) {
+		await reply(from, mess.wait, chat);
+		try {
+			const resultMedia = await getMediaSession(user_id);
+			if (resultMedia.type !== 'ayah') return;
+			resetMediaSession(user_id, 'ayah');
+			await sendAudio(from, resultMedia.audio, { mimetype: mimetypeAudio });
+		} catch (err) {
+			sendText(from, mess.error.link);
+			console.error(err);
+		}
+	} else if (!isMedia && newCommand === 'docquran' && getMediaSession(user_id)) {
+		await reply(from, mess.wait, chat);
+		try {
+			const resultMedia = getMediaSession(user_id)
+			resetMediaSession(user_id, 'quran')
+			await sendDocument(from, resultMedia.audio, { fileName: `${resultMedia.title}.mp3`, mimetype: 'audio/mpeg' })
+		} catch (err) {
+			console.error(err);
+			sendText(from, mess.error.link)
 		}
 	}
 }
