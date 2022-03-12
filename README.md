@@ -14,3 +14,4 @@ npm start
 
 ## Note :
 Edit no owner di Whatsapp.js bagian this.owner
+Edit link MongoDB di .env
