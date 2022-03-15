@@ -220,7 +220,7 @@ class Whatsapp {
 				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.quotedMessage !== null ? chat.message.extendedTextMessage.contextInfo : null;
 				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ? Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
-				const mentionedJid = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.mentionedJid !== [] ? chat.message.extendedTextMessage?.contextInfo?.mentionedJid : []
+				const mentionedJid = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.mentionedJid
 				const prefix = this.prefix;
 				const run = process.uptime();
 				const runtime = this.secondsToDhms(run);
@@ -275,6 +275,7 @@ class Whatsapp {
 				const isDocument = type === "documentMessage"
 				const isButtonMessage = type === 'buttonsMessage'
 				const isButtonResponseMessage = type === 'buttonsResponseMessage'
+				const isTemplateButtonReplyMessage = type === 'templateButtonReplyMessage'
 				const isQuotedAudio = type === 'extendedTextMessage' && content.includes('audioMessage')
 				const isQuotedImage = type === 'extendedTextMessage' && content.includes('imageMessage')
 				const isQuotedVideo = type === 'extendedTextMessage' && content.includes('videoMessage')
@@ -289,8 +290,9 @@ class Whatsapp {
 								chat.message.extendedTextMessage.text : null;
 				const message_button = type === 'buttonsResponseMessage' ?
 					chat.message.buttonsResponseMessage.selectedButtonId : type === 'templateMessage' ?
-						chat.message.templateMessage.hydratedTemplate.quickReplyButton.id : type === 'listResponseMessage' ?
-							chat.message.listResponseMessage.singleSelectReply.selectedRowId : null;
+						chat.message.templateMessage.hydratedTemplate.quickReplyButton.id : type === 'templateButtonReplyMessage' ?
+							chat.message.templateButtonReplyMessage.selectedId : type === 'listResponseMessage' ?
+								chat.message.listResponseMessage.singleSelectReply.selectedRowId : null;
 				let message = type === 'conversation' ?
 					chat.message.conversation : type === 'extendedTextMessage' ?
 						chat.message.extendedTextMessage.text : type === 'imageMessage' ?
@@ -306,7 +308,7 @@ class Whatsapp {
 						: null;
 				const args = message && typeof message !== "object"
 					? message.trim().split(/ +/).slice(1)
-					: message_prefix !== null ? message_prefix.trim().split(/ +/).slice(1) : null;
+					: message_prefix !== null ? message_prefix.trim().split(/ +/).slice(1) : [];
 				const far = args !== null ? args.join(" ") : null;
 				const isCmd = message && typeof message !== "object"
 					? message.startsWith(this.prefix)
@@ -401,6 +403,7 @@ class Whatsapp {
 					isDocument,
 					isButtonMessage,
 					isButtonResponseMessage,
+					isTemplateButtonReplyMessage,
 					isQuotedAudio,
 					isQuotedImage,
 					isQuotedVideo,
@@ -434,11 +437,13 @@ class Whatsapp {
 		})
 	}
 	printLog(msg) {
-		const { date, isCmd, message, command, groupName, isGroup, isMedia, isImage, isVideo, isDocument, isAudio, isSticker, user_id } = msg
+		const { date, isCmd, message, command, groupName, isGroup, isMedia, isTemplateButtonReplyMessage, isButtonResponseMessage, isDocument, isAudio, isSticker, user_id } = msg
 		if (!isCmd && isGroup && !isMedia && !isSticker && !command) console.log(color(`[GROUP || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
 		if (!isCmd && !isGroup && !isMedia && !isSticker && !command) console.log(color(`[PRIVATE || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
 		if (isCmd && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
 		if (isCmd && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
+		if (isGroup && !isMedia && !isSticker && isTemplateButtonReplyMessage || isButtonResponseMessage) console.log(color(`[GROUP || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
+		if (!isGroup && !isMedia && !isSticker && isTemplateButtonReplyMessage || isButtonResponseMessage) console.log(color(`[PRIVATE || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
 	}
 }
 

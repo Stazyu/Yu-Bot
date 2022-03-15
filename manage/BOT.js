@@ -2,12 +2,12 @@
 const { readFileSync, readdirSync } = require('fs');
 const path = require('path')
 const { Boom } = require("@hapi/boom")
+const { getDevice, DisconnectReason } = require('@adiwajshing/baileys');
 
 const Whatsapp = require('../app/Whatsapp');
-const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia } = require('../lib/functions');
+const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia, sendTemplateButton } = require('../lib/functions');
 const { getMediaSession, resetMediaSession } = require('../utils/sessionMedia');
-const { mess, menu } = require('../lib/help');
-const { getDevice, DisconnectReason } = require('@adiwajshing/baileys');
+const { mess, menu, help } = require('../lib/help');
 
 const waBot = () => {
 	const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
@@ -70,7 +70,7 @@ waBot();
  * @param {} receive Result Message yang udah di filter
  */
 const readCommand = async (receive, bot) => {
-	const { chat, from, isOwner, isGroupAdmin, command, prefix, args, isButtonResponseMessage } = receive;
+	const { chat, from, isOwner, isGroupAdmin, command, prefix, args, isButtonResponseMessage, isTemplateButtonReplyMessage } = receive;
 	const dir = readdirSync(path.join(__dirname, '../lib/command'));
 	// Print log in terminal
 	bot.printLog(receive);
@@ -95,14 +95,14 @@ const readCommand = async (receive, bot) => {
 					if (cmd_result.isGroupAdmin && !isGroupAdmin && !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Admin Group gan' }, { quoted: chat })
 					await cmd_result.execute(receive, bot.sock);
 					// Command help
-				} else if (command === 'help' && args[0] === v) {
+				} else if (!isTemplateButtonReplyMessage && command === 'help' && args[0] === v) {
 					await bot.sock.sendMessage(from, { text: String(cmd_result.description).replaceAll('prefix.', prefix) });
 				}
 			})
 		})
 	})
-	if (command === null || command === 'help') return;
-	if (command === 'menu') return await sendText(from, await menu(receive));
+	if (command === null || args.length != 0) return;
+	if (['help', 'menu', 'tos', 'donasi'].some(v => v === command)) return await menu_help(receive);
 
 	const unknownCmd = arrayCommand.some((v) => v === command);
 	if (!unknownCmd) return await reply(from, 'Command tidak ada', chat);
@@ -208,4 +208,47 @@ const buttonResponse = async (receive) => {
 			sendText(from, mess.error.link)
 		}
 	}
+
+	if (!isMedia && newCommand === 'donasi') {
+		const capt = `╔══✪〘 DONATE/DUKUNGAN 〙✪══
+║
+╠➥ *DONASI BISA MELALUI :*
+╠➥ *DANA, OVO, GO-PAY : 081578794887*
+╠➥ *SAWERIA : https://saweria.co/wahyuhp*
+╠➥ *TERIMAKASIH YANG SUDAH BER DONASI, SEMOGA DILANCARKAN REZEKINYA*
+╚═〘 YU BOT 〙`
+		await sendText(from, capt);
+	}
+	if (!isMedia && newCommand === 'tos') {
+		const caption_tos = `*INDONESIAN*
+- Dilarang menelepon bot !!
+- Mohon tidak menggunakan bot untuk melakukan tindakan ujaran kebencian dan sebagainya
+- Bot tidak bertanggung jawab terhadap apa yang pengguna lakukan kepada bot
+
+*ENGLISH*
+- Don't call bot !!
+- Please don't use bots to carry out hate speech acts and other
+- Bots are not responsible for what users do to bots`
+		await sendText(from, caption_tos);
+	}
+}
+
+const menu_help = async (receive) => {
+	const { from, command } = receive;
+	const templateButtons_help = [
+		{ index: 1, urlButton: { displayText: 'Jangan Lupa Follow', url: 'https://www.instagram.com/wahyuhp57/?hl=id' } },
+		{ index: 2, quickReplyButton: { displayText: 'MENU', id: 'menu' } },
+		{ index: 3, quickReplyButton: { displayText: 'DONASI', id: 'donasi' } },
+		{ index: 4, quickReplyButton: { displayText: 'TERMS OF USE', id: 'tos' } },
+		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'tos' } },
+	]
+	const templateButtons_menu = [
+		{ index: 1, urlButton: { displayText: 'Jangan Lupa Follow', url: 'https://www.instagram.com/wahyuhp57/?hl=id' } },
+		{ index: 2, quickReplyButton: { displayText: 'HELP', id: 'help' } },
+		{ index: 3, quickReplyButton: { displayText: 'DONASI', id: 'donasi' } },
+		{ index: 4, quickReplyButton: { displayText: 'TERMS OF USE', id: 'tos' } },
+		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'tos' } },
+	]
+	if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: '' });
+	if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: '' });
 }
