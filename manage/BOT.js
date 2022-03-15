@@ -102,7 +102,7 @@ const readCommand = async (receive, bot) => {
 		})
 	})
 	if (command === null || args.length != 0) return;
-	if (['help', 'menu', 'tos', 'donasi'].some(v => v === command)) return await menu_help(receive);
+	if (['help', 'menu', 'tos', 'donasi', 'groupbot'].some(v => v === command)) return await menu_help(receive);
 
 	const unknownCmd = arrayCommand.some((v) => v === command);
 	if (!unknownCmd) return await reply(from, 'Command tidak ada', chat);
@@ -233,8 +233,8 @@ const buttonResponse = async (receive) => {
 	}
 	if (!isMedia && newCommand === 'groupbot') {
 		const capt = `*『 Group YU-BOT 』*\n 
-		Link Group : https://chat.whatsapp.com/KEdt4oziB2qBpdL4KKNvIu
-		*Silahkan gabung untuk mendapat informasi tentang Bot*`
+Link Group : https://chat.whatsapp.com/KEdt4oziB2qBpdL4KKNvIu
+*Silahkan gabung untuk mendapat informasi tentang Bot*`
 		await sendText(from, capt);
 	}
 }
