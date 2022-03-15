@@ -231,6 +231,12 @@ const buttonResponse = async (receive) => {
 - Bots are not responsible for what users do to bots`
 		await sendText(from, caption_tos);
 	}
+	if (!isMedia && newCommand === 'groupbot') {
+		const capt = `*『 Group YU-BOT 』*\n 
+		Link Group : https://chat.whatsapp.com/KEdt4oziB2qBpdL4KKNvIu
+		*Silahkan gabung untuk mendapat informasi tentang Bot*`
+		await sendText(from, capt);
+	}
 }
 
 const menu_help = async (receive) => {
@@ -240,14 +246,14 @@ const menu_help = async (receive) => {
 		{ index: 2, quickReplyButton: { displayText: 'MENU', id: 'menu' } },
 		{ index: 3, quickReplyButton: { displayText: 'DONASI', id: 'donasi' } },
 		{ index: 4, quickReplyButton: { displayText: 'TERMS OF USE', id: 'tos' } },
-		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'tos' } },
+		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'groupbot' } },
 	]
 	const templateButtons_menu = [
 		{ index: 1, urlButton: { displayText: 'Jangan Lupa Follow', url: 'https://www.instagram.com/wahyuhp57/?hl=id' } },
 		{ index: 2, quickReplyButton: { displayText: 'HELP', id: 'help' } },
 		{ index: 3, quickReplyButton: { displayText: 'DONASI', id: 'donasi' } },
 		{ index: 4, quickReplyButton: { displayText: 'TERMS OF USE', id: 'tos' } },
-		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'tos' } },
+		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'groupbot' } },
 	]
 	if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: '' });
 	if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: '' });
