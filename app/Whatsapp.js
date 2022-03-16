@@ -215,13 +215,20 @@ class Whatsapp {
 				const isGroup = from.endsWith('@g.us');
 				const content = JSON.stringify(chat.message);
 				const type = Object.keys(chat.message).find((v, i) => v !== 'messageContextInfo');
+				const body = (type === 'conversation' && chat.message.conversation) ?
+					chat.message.conversation : (type === 'imageMessage') && chat.message.imageMessage.caption ?
+						chat.message.imageMessage.caption : (type === 'videoMessage') && chat.message.videoMessage.caption ?
+							chat.message.videoMessage.caption : (type === 'extendedTextMessage') && chat.message.extendedTextMessage.text ?
+								chat.message.extendedTextMessage.text : '';
 				const messageTimestamp = chat.messageTimestamp;
 				const totalChat = store.chats.all();
-				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.quotedMessage !== null ? chat.message.extendedTextMessage.contextInfo : null;
-				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ? Object.keys(quotedInfo.quotedMessage)[0] : null;
+				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.quotedMessage !== null ?
+					chat.message.extendedTextMessage.contextInfo : null;
+				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ?
+					Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
 				const mentionedJid = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.mentionedJid
-				const prefix = this.prefix;
+				let prefix = this.prefix;
 				const run = process.uptime();
 				const runtime = this.secondsToDhms(run);
 				const time = moment().format('HH:mm:ss');
@@ -239,6 +246,12 @@ class Whatsapp {
 						})
 					return sett;
 				})
+
+				// Multi Prefix by Staz
+				if (['!', '#', '/', '.'].some(v => v === body.slice(0, 1))) {
+					prefix = body.slice(0, 1);
+					// console.log(body.slice(0, 1));
+				}
 
 				/* ============ Meta User & Owner ============ */
 				const user_idd = isGroup ? chat.key.participant : chat.key.remoteJid;
@@ -283,10 +296,10 @@ class Whatsapp {
 				const isQuotedDocument = type === 'extendedTextMessage' && content.includes('documentMessage')
 				const isQuotedMedia = isQuotedAudio || isQuotedImage || isQuotedVideo || isQuotedSticker || isQuotedDocument
 
-				const message_prefix = type === 'conversation' && chat.message.conversation.startsWith(this.prefix) ?
-					chat.message.conversation : type === 'imageMessage' && chat.message.imageMessage.caption !== null && chat.message.imageMessage.caption.startsWith(this.prefix) ?
-						chat.message.imageMessage.caption : type === 'videoMessage' && chat.message.videoMessage.caption !== null && chat.message.videoMessage.caption.startsWith(this.prefix) ?
-							chat.message.videoMessage.caption : type === 'extendedTextMessage' && chat.message.extendedTextMessage.text.startsWith(this.prefix) ?
+				const message_prefix = type === 'conversation' && chat.message.conversation.startsWith(prefix) ?
+					chat.message.conversation : type === 'imageMessage' && chat.message.imageMessage.caption !== null && chat.message.imageMessage.caption.startsWith(prefix) ?
+						chat.message.imageMessage.caption : type === 'videoMessage' && chat.message.videoMessage.caption !== null && chat.message.videoMessage.caption.startsWith(prefix) ?
+							chat.message.videoMessage.caption : type === 'extendedTextMessage' && chat.message.extendedTextMessage.text.startsWith(prefix) ?
 								chat.message.extendedTextMessage.text : null;
 				const message_button = type === 'buttonsResponseMessage' ?
 					chat.message.buttonsResponseMessage.selectedButtonId : type === 'templateMessage' ?
@@ -298,7 +311,7 @@ class Whatsapp {
 						chat.message.extendedTextMessage.text : type === 'imageMessage' ?
 							chat.message.imageMessage.caption : type === 'videoMessage' ?
 								chat.message.videoMessage.caption : null;
-				message = String(message).startsWith(this.prefix) ? null : message
+				message = String(message).startsWith(prefix) ? null : message
 
 				/* Message Command */
 				const command = message_button !== null
@@ -311,8 +324,8 @@ class Whatsapp {
 					: message_prefix !== null ? message_prefix.trim().split(/ +/).slice(1) : [];
 				const far = args !== null ? args.join(" ") : null;
 				const isCmd = message && typeof message !== "object"
-					? message.startsWith(this.prefix)
-					: message_prefix !== null ? message_prefix.startsWith(this.prefix) : false;
+					? message.startsWith(prefix)
+					: message_prefix !== null ? message_prefix.startsWith(prefix) : false;
 
 				/* Ucapan Waktu */
 				let ucapanWaktu = ''
@@ -344,7 +357,7 @@ class Whatsapp {
 				const isVerify = isGroup ?
 					await db.findOneGroup({ group_id: groupId }).then(v => v.group_id === groupId).catch(err => undefined) :
 					await db.findOneUser({ user_id }).then(v => v.user_id === user_id).catch(err => undefined);
-				if (!isVerify && isGroup && isCmd) {
+				if (isVerify !== true && isGroup && isCmd) {
 					let ppWa = null;
 					try {
 						ppWa = await this.sock.profilePictureUrl(from, 'image');
@@ -358,7 +371,7 @@ class Whatsapp {
 						join_time: Date.now(),
 						verify: true
 					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(groupName, 'green'), color('FROM', 'white'), color(groupName, 'yellow')));
-				} else if (!isVerify && !isGroup && isCmd) {
+				} else if (isVerify !== true && !isGroup && isCmd) {
 					let ppWa = null;
 					try {
 						ppWa = await this.sock.profilePictureUrl(from, 'image');
@@ -437,13 +450,15 @@ class Whatsapp {
 		})
 	}
 	printLog(msg) {
-		const { date, isCmd, message, command, groupName, isGroup, isMedia, isTemplateButtonReplyMessage, isButtonResponseMessage, isDocument, isAudio, isSticker, user_id } = msg
+		const { date, isCmd, message, command, groupName, isGroup, isMedia, isTemplateButtonReplyMessage, isButtonResponseMessage, prefix, isAudio, isSticker, user_id } = msg
 		if (!isCmd && isGroup && !isMedia && !isSticker && !command) console.log(color(`[GROUP || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
 		if (!isCmd && !isGroup && !isMedia && !isSticker && !command) console.log(color(`[PRIVATE || MSG]`, 'blue'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(message, 'blue'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
-		if (isCmd && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
-		if (isCmd && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(this.prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
-		if (isGroup && !isMedia && !isSticker && isTemplateButtonReplyMessage || isButtonResponseMessage) console.log(color(`[GROUP || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
-		if (!isGroup && !isMedia && !isSticker && isTemplateButtonReplyMessage || isButtonResponseMessage) console.log(color(`[PRIVATE || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
+		if (isCmd && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
+		if (isCmd && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || CMD]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(prefix + command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
+		if (isTemplateButtonReplyMessage && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
+		if (isTemplateButtonReplyMessage && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
+		if (isButtonResponseMessage && isGroup && !isMedia && !isSticker) console.log(color(`[GROUP || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'), color('IN', 'white'), color(groupName, 'yellow'));
+		if (isButtonResponseMessage && !isGroup && !isMedia && !isSticker) console.log(color(`[PRIVATE || BUTTON]`), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color(command), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow'));
 	}
 }
 

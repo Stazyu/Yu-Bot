@@ -1,13 +1,15 @@
 /* 1st modules  */
-const { readFileSync, readdirSync } = require('fs');
+const { readFileSync, readdirSync, symlink } = require('fs');
 const path = require('path')
 const { Boom } = require("@hapi/boom")
 const { getDevice, DisconnectReason } = require('@adiwajshing/baileys');
 
 const Whatsapp = require('../app/Whatsapp');
-const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia, sendTemplateButton } = require('../lib/functions');
+const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia, sendTemplateButton, sendImage } = require('../lib/functions');
 const { getMediaSession, resetMediaSession } = require('../utils/sessionMedia');
-const { mess, menu, help } = require('../lib/help');
+const { mess, menu, help, infoBot } = require('../lib/help');
+const ModelDb = require('../models/index');
+const db = new ModelDb();
 
 const waBot = () => {
 	const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
@@ -41,9 +43,74 @@ const waBot = () => {
 		await readCommand(receive, bot);
 	})
 
-	bot.groupParticipantsUpdate((value) => {
-		console.log('Update Group');
-		console.log(value);
+	bot.groupParticipantsUpdate(async (group) => {
+		console.log(group);
+		const welcome = await db.findOneGroup({ group_id: group.id }).then(res => res.welcome).catch(err => undefined);
+		const left = await db.findOneGroup({ group_id: group.id }).then(res => res.left).catch(err => undefined);
+		const text_welcome = await db.findOneGroup({ group_id: group.id }).then(res => res.text_welcome).catch(err => undefined);
+		const text_left = await db.findOneGroup({ group_id: group.id }).then(res => res.text_left).catch(err => undefined);
+
+		try {
+			const { profilePictureUrl, groupMetadata } = bot.sock;
+			const mData = await groupMetadata(group.id);
+			if (group.action === 'add' && welcome) {
+				const id_number = group.participants[0];
+				const no_user = id_number.replace('@s.whatsapp.net', '');
+				// Get foto profil user
+				let ppUser = '';
+				try {
+					ppUser = await profilePictureUrl(id_number, 'image');
+				} catch {
+					ppUser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+				}
+				if (text_welcome != null) {
+					await sendImage(mData.id, ppUser, { capt: text_welcome.replace('@user', '@' + no_user).replace('@groupname', mData.subject), mentions: [id_number] });
+				} else {
+					await sendImage(mData.id, ppUser, { capt: capt_welcome(id_number, mData.subject), mentions: [id_number] });
+				}
+			} else if (group.action === 'remove' && left) {
+				const id_number = group.participants[0];
+				const no_user = id_number.replace('@s.whatsapp.net', '');
+				// Get foto profil user
+				let ppUser = '';
+				try {
+					ppUser = await profilePictureUrl(id_number, 'image');
+				} catch {
+					ppUser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+				}
+				if (text_left != null) {
+					await sendImage(mData.id, ppUser, { capt: text_left.replace('@user', '@' + no_user).replace('@groupname', mData.subject), mentions: [id_number] });
+				} else {
+					await sendImage(mData.id, ppUser, { capt: capt_left(id_number, mData.subject), mentions: [id_number] });
+				}
+			}
+		} catch (err) {
+			console.log(err);
+		}
+		// Caption Selamat Datang
+		function capt_welcome(jid, name) {
+			return `Halo @${jid.replace('@s.whatsapp.net', '')} 👋\nWelcome to the *Grup ${name}*
+	
+NewMem Tolong di Isi ya😊
+*Intro GC 「${name}」:*
+
+*>>Nama :*
+
+*>>Usia :*
+
+*>>Asal :*
+
+*>>Gender :*
+
+Salam Kenal👋
+
+※JanganLupaBacaDeskripsi😊
+※PatuhiPeraturanGC😊`
+		}
+		// Caption Out Group
+		function capt_left(jid, name) {
+			return `Selamat Tinggal @${jid.replace('@s.whatsapp.net', '')} di Grup ${name} 👋. Semoga Sehat selalu di sana`
+		}
 	})
 	return bot;
 }
@@ -256,5 +323,5 @@ const menu_help = async (receive) => {
 		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'groupbot' } },
 	]
 	if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: '' });
-	if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: '' });
+	if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: await infoBot(receive) });
 }
