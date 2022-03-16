@@ -322,6 +322,6 @@ const menu_help = async (receive) => {
 		{ index: 4, quickReplyButton: { displayText: 'TERMS OF USE', id: 'tos' } },
 		{ index: 5, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'groupbot' } },
 	]
-	if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: '' });
+	if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: await infoBot(receive) });
 	if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: await infoBot(receive) });
 }
