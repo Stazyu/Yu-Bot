@@ -190,7 +190,7 @@ const buttonResponse = async (receive) => {
 		try {
 			const resultMedia = getMediaSession(user_id)
 			if (resultMedia.type !== 'ytdl') return;
-			if (resultMedia.sizeMp3 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp3}`)
+			if (resultMedia.sizeMp3 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp3}`, chat)
 			resetMediaSession(user_id, 'ytdl')
 			await sendAudio(from, resultMedia.urlMp3, { mimetype: mimetypeAudio })
 		} catch (err) {
@@ -201,7 +201,7 @@ const buttonResponse = async (receive) => {
 		await reply(from, mess.wait, chat)
 		try {
 			const resultMedia = getMediaSession(user_id)
-			if (resultMedia.sizeMp4 >= 100) return bot.reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp4}`)
+			if (resultMedia.sizeMp4 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp4}`, chat)
 			resetMediaSession(user_id, 'ytdl')
 			await sendVideo(from, resultMedia.urlMp4);
 		} catch (err) {
