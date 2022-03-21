@@ -61,7 +61,7 @@ const waBot = () => {
 				try {
 					ppUser = await profilePictureUrl(id_number, 'image');
 				} catch {
-					ppUser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+					ppUser = 'https://i.ibb.co/NyMWypT/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil.webp'
 				}
 				if (text_welcome != null) {
 					await sendImage(mData.id, ppUser, { capt: text_welcome.replace('@user', '@' + no_user).replace('@groupname', mData.subject), mentions: [id_number] });
@@ -76,7 +76,7 @@ const waBot = () => {
 				try {
 					ppUser = await profilePictureUrl(id_number, 'image');
 				} catch {
-					ppUser = 'https://i0.wp.com/www.gambarunik.id/wp-content/uploads/2019/06/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil-.jpg'
+					ppUser = 'https://i.ibb.co/NyMWypT/Top-Gambar-Foto-Profil-Kosong-Lucu-Tergokil.webp'
 				}
 				if (text_left != null) {
 					await sendImage(mData.id, ppUser, { capt: text_left.replace('@user', '@' + no_user).replace('@groupname', mData.subject), mentions: [id_number] });
