@@ -12,8 +12,6 @@ const ModelDb = require('../models/index');
 const io = require('../app/WebSocket');
 const db = new ModelDb();
 
-
-
 const waBot = () => {
 	const bot = new Whatsapp(path.join(__dirname, 'Auth_info.json'));
 	bot.sock.ev.on('connection.update', async (update) => {
