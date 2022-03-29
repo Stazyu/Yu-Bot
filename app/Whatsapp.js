@@ -21,6 +21,8 @@ moment.locale('id')
 const { connection } = require('../lib/functions');
 const { color } = require('../utils/color');
 const ModelDb = require('../models/index');
+const { checkAfkUser, getAfkId, getAfkReason, getAfkTime } = require('../lib/functions/afk');
+const { prefixx, afkOn, afkDone, afkMentioned } = require('../lib/message/text/lang/ind');
 const db = new ModelDb();
 
 // Save Message
@@ -227,7 +229,7 @@ class Whatsapp {
 				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ?
 					Object.keys(quotedInfo.quotedMessage)[0] : null;
 				const botNumber = String(this.sock.user.id).split(':')[0] + '@s.whatsapp.net';
-				const mentionedJid = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.mentionedJid
+				const mentionedJid = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.mentionedJid ? chat.message.extendedTextMessage?.contextInfo?.mentionedJid : []
 				let prefix = this.prefix;
 				const run = process.uptime();
 				const runtime = this.secondsToDhms(run);
@@ -252,6 +254,7 @@ class Whatsapp {
 					prefix = body.slice(0, 1);
 					// console.log(body.slice(0, 1));
 				}
+				prefixx(prefix);
 
 				/* ============ Meta User & Owner ============ */
 				const user_idd = isGroup ? chat.key.participant : chat.key.remoteJid;
@@ -388,6 +391,25 @@ class Whatsapp {
 					}).then(v => console.log(color(`[VERIFY || AUTO]`, 'green'), color('=>', 'white'), color(`DATE: ${date}`, 'yellow'), color('=>', 'white'), color('NAME', 'white'), color(pushName, 'green'), color('FROM', 'white'), color(String(user_id).split('@')[0], 'yellow')));
 				}
 
+				// Afk
+				const dbAfk = await db.findAllDocument('afk');
+				const isAfkOn = checkAfkUser(user_id, dbAfk);
+
+				if (isGroup) {
+					for (let ment of mentionedJid) {
+						if (checkAfkUser(ment, dbAfk)) {
+							const getId = getAfkId(ment, dbAfk);
+							const getReason = getAfkReason(ment, dbAfk);
+							const getTime = getAfkTime(getId, dbAfk);
+							await this.sock.sendMessage(from, { text: afkMentioned(getReason, getTime) }, { quoted: chat });
+						}
+					}
+					if (checkAfkUser(user_id, dbAfk) && !isCmd) {
+						await db.deleteOneDocument('afk', { userId: user_id })
+						await this.sock.sendMessage(from, { text: afkDone(pushName) }, { quoted: chat });
+					}
+				}
+
 				receive({
 					chat,
 					chatMessage,
@@ -423,8 +445,7 @@ class Whatsapp {
 					isQuotedSticker,
 					isQuotedDocument,
 					isQuotedMedia,
-					// body,
-					// messagesLink,
+					isAfkOn,
 					command,
 					args,
 					far,
