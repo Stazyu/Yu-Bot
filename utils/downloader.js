@@ -293,44 +293,34 @@ function tiktokDl(url) {
  * @param url - The URL of the Instagram post you want to download.
  * @returns an object with two properties: image and link.
  */
-function igDownloader(url) {
+const igDownloader = (url) => {
     return new Promise((resolve, reject) => {
-        const arrayLink = {
-            image: null,
-            link: []
-        }
+        const result = [];
         const config = {
-            data: {
-                url,
-                action: 'post'
+            header: {
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                'content-length': 89,
+                'content-type': 'application/x-www-form-urlencoded',
+                origin: 'https://downloadgram.org',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Mobile Safari/537.36'
             },
-            headers: {
-                'content-type': 'multipart/form-data; boundary=----WebKitFormBoundary4E7p8KtS8HAgaqnq',
-                'cookie': 'PHPSESSID=q8b960g6t7b62pip8dompq1k4q',
-                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Mobile Safari/537.36',
+            data: {
+                url: url,
+                submit: ''
             }
         }
-        axios.post('https://snapinsta.app/action.php', qs.stringify(config.data), config.headers)
-            .then(({ data }) => {
-                const result = new NodeVM({
-                    'compiler': 'javascript',
-                    'console': 'inherit',
-                }).run(/<script>(.*)<\/script>/g.exec(data)?.[1].replace('eval', '').replace(/\(function(.)?\(h/gi, 'module.exports = (function (h')).split(/innerHTML = \"/)[1].split(/"\; parent/)[0].replace(/\\/g, '');
-                const $ = cheerio.load(result);
-                $('div.download-items').each((a, b) => {
-                    if ($(b).find('a').attr('href').includes('dl.php')) {
-                        arrayLink.link.push('https://snapinsta.app' + $(b).find('a').attr('href'))
-                    } else {
-                        arrayLink.link.push($(b).find('a').attr('href'))
-                    }
+        axios.post('https://downloadgram.org/', new URLSearchParams(Object.entries(config.data)), config.header)
+            .then((res) => {
+                const { data } = res;
+                const $ = cheerio.load(data);
+                $('#downloadBox').find('a').each((i, e) => {
+                    result.push({ url: $(e).attr('href') });
                 })
-                const image = $('img').attr('src');
-                arrayLink.image = 'https://snapinsta.app' + image;
-                resolve(arrayLink);
+                resolve(result);
             }).catch((err) => {
                 reject(err);
             });
-    });
+    })
 }
 
 const fbDownloader = async (url) => {
