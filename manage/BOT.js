@@ -5,7 +5,7 @@ const { Boom } = require("@hapi/boom")
 const { getDevice, DisconnectReason } = require('@adiwajshing/baileys');
 
 const Whatsapp = require('../app/Whatsapp');
-const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia, sendTemplateButton, sendImage } = require('../lib/functions');
+const { reply, sendAudio, sendVideo, sendDocument, sendText, sendMedia, sendTemplateButton, sendImage, getBuffer } = require('../lib/functions');
 const { getMediaSession, resetMediaSession } = require('../utils/sessionMedia');
 const { mess, menu, help, infoBot } = require('../lib/help');
 const ModelDb = require('../models/index');
@@ -189,10 +189,11 @@ Salam Kenal👋
 			await reply(from, mess.wait, chat)
 			try {
 				const resultMedia = getMediaSession(user_id)
+				const buff = await getBuffer(resultMedia.urlMp3);
 				if (resultMedia.type !== 'ytdl') return;
 				if (resultMedia.sizeMp3 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp3}`, chat)
 				resetMediaSession(user_id, 'ytdl')
-				await sendAudio(from, resultMedia.urlMp3, { mimetype: mimetypeAudio })
+				await sendAudio(from, buff, { mimetype: mimetypeAudio })
 			} catch (err) {
 				console.error(err);
 				sendText(from, mess.error.link)
