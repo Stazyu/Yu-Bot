@@ -10,7 +10,7 @@
   "author": "Wahyu-HP",
   "license": "MIT",
   "dependencies": {
-    "@adiwajshing/baileys": "^4.0.0",
+    "@adiwajshing/baileys": "^4.2.0",
     "acrcloud": "^1.4.0",
     "axios": "^0.25.0",
     "brainly-scraper-v2": "^2.0.9",

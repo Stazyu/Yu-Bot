@@ -202,9 +202,10 @@ Salam Kenal👋
 			await reply(from, mess.wait, chat)
 			try {
 				const resultMedia = getMediaSession(user_id)
+				const buff = await getBuffer(resultMedia.urlMp3);
 				if (resultMedia.sizeMp4 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp4}`, chat)
 				resetMediaSession(user_id, 'ytdl')
-				await sendVideo(from, resultMedia.urlMp4);
+				await sendVideo(from, buff);
 			} catch (err) {
 				console.error(err);
 				sendText(from, mess.error.link)
