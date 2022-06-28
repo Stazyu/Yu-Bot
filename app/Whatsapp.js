@@ -26,13 +26,13 @@ const { prefixx, afkOn, afkDone, afkMentioned } = require('../lib/message/text/l
 const db = new ModelDb();
 
 // Save Message
-const store = makeInMemoryStore({})
-// can be read from a file
-store.readFromFile('./baileys_store.json')
-// saves the state to a file every 10s
-setInterval(() => {
-	store.writeToFile('./baileys_store.json')
-}, 10_000)
+// const store = makeInMemoryStore({})
+// // can be read from a file
+// store.readFromFile('./baileys_store.json')
+// // saves the state to a file every 10s
+// setInterval(() => {
+// 	store.writeToFile('./baileys_store.json')
+// }, 10_000)
 
 class Whatsapp {
 	/**
@@ -56,7 +56,7 @@ class Whatsapp {
 			// 	}
 			// }
 		})
-		store.bind(sock.ev)
+		// store.bind(sock.ev)
 
 		// sock.ev.on('connection.update', async (update) => {
 		// 	const { connection, lastDisconnect, qr } = update
@@ -223,7 +223,7 @@ class Whatsapp {
 							chat.message.videoMessage.caption : (type === 'extendedTextMessage') && chat.message.extendedTextMessage.text ?
 								chat.message.extendedTextMessage.text : '';
 				const messageTimestamp = chat.messageTimestamp;
-				const totalChat = store.chats.all();
+				// const totalChat = store.chats.all();
 				const quotedInfo = type === 'extendedTextMessage' && chat.message.extendedTextMessage?.contextInfo?.quotedMessage !== null ?
 					chat.message.extendedTextMessage.contextInfo : null;
 				const quotedType = type === 'extendedTextMessage' && quotedInfo !== null ?
@@ -427,7 +427,7 @@ class Whatsapp {
 					message,
 					content,
 					type,
-					totalChat,
+					// totalChat,
 					quotedType,
 					prefix,
 					isMedia,

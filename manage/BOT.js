@@ -203,7 +203,6 @@ Salam Kenal👋
 			try {
 				const resultMedia = getMediaSession(user_id)
 				const buff = await getBuffer(resultMedia.urlMp4);
-				console.log(Buffer.from(buff));
 				if (resultMedia.sizeMp4 >= 100) return reply(from, `Maaf file media terlalu besar, silahkan download lewat link di bawah ini\n\n Link: ${resultMedia.urlMp4}`, chat)
 				resetMediaSession(user_id, 'ytdl')
 				await sendVideo(from, buff);
