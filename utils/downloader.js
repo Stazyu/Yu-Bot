@@ -217,73 +217,113 @@ async function pinterest(query) {
 //     });
 // }
 
-function tiktokDl(url) {
+// function tiktokDl(url) {
+//     return new Promise(async (resolve, reject) => {
+//         try {
+//             url = (await fetch(url)).url
+//             const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
+//             if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
+//             const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
+//             const { data } = await axios.get(urlTik, {
+//                 headers: {
+//                     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+//                     accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+//                 }
+//             });
+//             axios.get('https://tikdown.org/id', {
+//                 headers: {
+//                     cookie: 'XSRF-TOKEN=eyJpdiI6ImVNVVJtcHVwcGJJWnM3L1hTVnJZWmc9PSIsInZhbHVlIjoiM2p2T29TMGRKSlE0VGxkZFpPZ0RPZE43QncvYThONWlCYnppSDNBQXlWMlNoMk42N1VkTGwzQkNTNGZjM3h0Z09YOUV6eDloY2dGaC92aTdqczNLMzdwWjVobjA0NVU5aXlwbUpNL1NVbm1XNVhEUzUyL3VjMzRJWnZ6Z28rZHEiLCJtYWMiOiIyYTk2YTkxZGY5MjhmZDZmYTczNmIyOWJiZmY3MTZjNjJiNTBlOTZkNzRiNjI4OGJjNjQ0Y2E3ZDAwZGRmMGExIn0%3D; laravel_session=eyJpdiI6IkNjMDE0ZzNLSXR3UlFLZDMreTdueUE9PSIsInZhbHVlIjoiN0poS1hiUTBrdzQ2WGhIMkFlQmdPVWt6a3hsRUVvTzBFWHBVY3didXB5Uit6akVEY3ZtMnlqY1JkWUZBT0RRV09vUHRpMndjZFJISVRnY2NyajN2dWRETk1wcWljSHlmRS9pRWV1Z3l1alBuT3NhUzRnL2V0aVFFVmVGcUZyWlQiLCJtYWMiOiI1ODhjMWQ5YjY1YzQ2MTM4Zjg1ZWQ0OTUzN2QwODc0NGYxYjY1NWNiMjRlNTc2ODY1YzhiOWUwOWU3MDA0MDZhIn0%3D',
+//                     referer: 'https://tikdown.org/id',
+//                     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+//                     accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+//                 },
+//             })
+//                 .then((res) => {
+//                     const $ = cheerio.load(res.data);
+//                     const token = $('input[name="_token"]').attr('value');
+//                     axios.get(`https://tikdown.org/getAjax?url=https://www.tiktok.com/${regTik[1]}/video/${regTik[3]}&_token=${token}`, {
+//                         headers: {
+//                             cookie: 'XSRF-TOKEN=eyJpdiI6ImVNVVJtcHVwcGJJWnM3L1hTVnJZWmc9PSIsInZhbHVlIjoiM2p2T29TMGRKSlE0VGxkZFpPZ0RPZE43QncvYThONWlCYnppSDNBQXlWMlNoMk42N1VkTGwzQkNTNGZjM3h0Z09YOUV6eDloY2dGaC92aTdqczNLMzdwWjVobjA0NVU5aXlwbUpNL1NVbm1XNVhEUzUyL3VjMzRJWnZ6Z28rZHEiLCJtYWMiOiIyYTk2YTkxZGY5MjhmZDZmYTczNmIyOWJiZmY3MTZjNjJiNTBlOTZkNzRiNjI4OGJjNjQ0Y2E3ZDAwZGRmMGExIn0%3D; laravel_session=eyJpdiI6IkNjMDE0ZzNLSXR3UlFLZDMreTdueUE9PSIsInZhbHVlIjoiN0poS1hiUTBrdzQ2WGhIMkFlQmdPVWt6a3hsRUVvTzBFWHBVY3didXB5Uit6akVEY3ZtMnlqY1JkWUZBT0RRV09vUHRpMndjZFJISVRnY2NyajN2dWRETk1wcWljSHlmRS9pRWV1Z3l1alBuT3NhUzRnL2V0aVFFVmVGcUZyWlQiLCJtYWMiOiI1ODhjMWQ5YjY1YzQ2MTM4Zjg1ZWQ0OTUzN2QwODc0NGYxYjY1NWNiMjRlNTc2ODY1YzhiOWUwOWU3MDA0MDZhIn0%3D',
+//                             referer: 'https://tikdown.org/id',
+//                             'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+//                             accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+//                             'content-type': 'text/html; charset=UTF-8'
+//                         }
+//                     })
+//                         .then((res) => {
+//                             const $ = cheerio.load(res.data.html)
+//                             const result = {
+//                                 info: {
+//                                     nickname: data.itemInfo.itemStruct.author.nickname,
+//                                     username: '@' + data.itemInfo.itemStruct.author.uniqueId,
+//                                     desc: data.itemInfo.itemStruct.desc,
+//                                     created: new Date(data.itemInfo.itemStruct.createTime * 1000).toLocaleDateString('id'),
+//                                     image: $('img').attr('src'),
+//                                 },
+//                                 media: {
+//                                     wm: data.itemInfo.itemStruct.video.downloadAddr,
+//                                     nowm: null,
+//                                     music: data.itemInfo.itemStruct.music.playUrl,
+//                                     music2: null
+//                                 },
+//                             }
+//                             $('div.download-links').find('a').each((i, e) => {
+//                                 if ($(e).attr('href').endsWith('mp4')) {
+//                                     result.media.nowm = $(e).attr('href');
+//                                 } else {
+//                                     result.media.music2 = $(e).attr('href');
+//                                 }
+//                             })
+//                             resolve(result);
+//                         }).catch((err) => {
+//                             reject(err);
+//                         });
+//                 }).catch((err) => {
+//                     reject(err);
+//                 });
+//         } catch (err) {
+//             reject(err);
+//         }
+//     })
+// }
+
+const tiktokDl = (url) => {
     return new Promise(async (resolve, reject) => {
-        try {
-            url = (await fetch(url)).url
-            const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
-            if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
-            const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
-            const { data } = await axios.get(urlTik, {
-                headers: {
-                    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
-                    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-                }
-            });
-            axios.get('https://tikdown.org/id', {
-                headers: {
-                    cookie: 'XSRF-TOKEN=eyJpdiI6ImVNVVJtcHVwcGJJWnM3L1hTVnJZWmc9PSIsInZhbHVlIjoiM2p2T29TMGRKSlE0VGxkZFpPZ0RPZE43QncvYThONWlCYnppSDNBQXlWMlNoMk42N1VkTGwzQkNTNGZjM3h0Z09YOUV6eDloY2dGaC92aTdqczNLMzdwWjVobjA0NVU5aXlwbUpNL1NVbm1XNVhEUzUyL3VjMzRJWnZ6Z28rZHEiLCJtYWMiOiIyYTk2YTkxZGY5MjhmZDZmYTczNmIyOWJiZmY3MTZjNjJiNTBlOTZkNzRiNjI4OGJjNjQ0Y2E3ZDAwZGRmMGExIn0%3D; laravel_session=eyJpdiI6IkNjMDE0ZzNLSXR3UlFLZDMreTdueUE9PSIsInZhbHVlIjoiN0poS1hiUTBrdzQ2WGhIMkFlQmdPVWt6a3hsRUVvTzBFWHBVY3didXB5Uit6akVEY3ZtMnlqY1JkWUZBT0RRV09vUHRpMndjZFJISVRnY2NyajN2dWRETk1wcWljSHlmRS9pRWV1Z3l1alBuT3NhUzRnL2V0aVFFVmVGcUZyWlQiLCJtYWMiOiI1ODhjMWQ5YjY1YzQ2MTM4Zjg1ZWQ0OTUzN2QwODc0NGYxYjY1NWNiMjRlNTc2ODY1YzhiOWUwOWU3MDA0MDZhIn0%3D',
-                    referer: 'https://tikdown.org/id',
-                    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
-                    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-                },
-            })
-                .then((res) => {
-                    const $ = cheerio.load(res.data);
-                    const token = $('input[name="_token"]').attr('value');
-                    axios.get(`https://tikdown.org/getAjax?url=https://www.tiktok.com/${regTik[1]}/video/${regTik[3]}&_token=${token}`, {
-                        headers: {
-                            cookie: 'XSRF-TOKEN=eyJpdiI6ImVNVVJtcHVwcGJJWnM3L1hTVnJZWmc9PSIsInZhbHVlIjoiM2p2T29TMGRKSlE0VGxkZFpPZ0RPZE43QncvYThONWlCYnppSDNBQXlWMlNoMk42N1VkTGwzQkNTNGZjM3h0Z09YOUV6eDloY2dGaC92aTdqczNLMzdwWjVobjA0NVU5aXlwbUpNL1NVbm1XNVhEUzUyL3VjMzRJWnZ6Z28rZHEiLCJtYWMiOiIyYTk2YTkxZGY5MjhmZDZmYTczNmIyOWJiZmY3MTZjNjJiNTBlOTZkNzRiNjI4OGJjNjQ0Y2E3ZDAwZGRmMGExIn0%3D; laravel_session=eyJpdiI6IkNjMDE0ZzNLSXR3UlFLZDMreTdueUE9PSIsInZhbHVlIjoiN0poS1hiUTBrdzQ2WGhIMkFlQmdPVWt6a3hsRUVvTzBFWHBVY3didXB5Uit6akVEY3ZtMnlqY1JkWUZBT0RRV09vUHRpMndjZFJISVRnY2NyajN2dWRETk1wcWljSHlmRS9pRWV1Z3l1alBuT3NhUzRnL2V0aVFFVmVGcUZyWlQiLCJtYWMiOiI1ODhjMWQ5YjY1YzQ2MTM4Zjg1ZWQ0OTUzN2QwODc0NGYxYjY1NWNiMjRlNTc2ODY1YzhiOWUwOWU3MDA0MDZhIn0%3D',
-                            referer: 'https://tikdown.org/id',
-                            'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
-                            accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                            'content-type': 'text/html; charset=UTF-8'
-                        }
-                    })
-                        .then((res) => {
-                            const $ = cheerio.load(res.data.html)
-                            const result = {
-                                info: {
-                                    nickname: data.itemInfo.itemStruct.author.nickname,
-                                    username: '@' + data.itemInfo.itemStruct.author.uniqueId,
-                                    desc: data.itemInfo.itemStruct.desc,
-                                    created: new Date(data.itemInfo.itemStruct.createTime * 1000).toLocaleDateString('id'),
-                                    image: $('img').attr('src'),
-                                },
-                                media: {
-                                    wm: data.itemInfo.itemStruct.video.downloadAddr,
-                                    nowm: null,
-                                    music: data.itemInfo.itemStruct.music.playUrl,
-                                    music2: null
-                                },
-                            }
-                            $('div.download-links').find('a').each((i, e) => {
-                                if ($(e).attr('href').endsWith('mp4')) {
-                                    result.media.nowm = $(e).attr('href');
-                                } else {
-                                    result.media.music2 = $(e).attr('href');
-                                }
-                            })
-                            resolve(result);
-                        }).catch((err) => {
-                            reject(err);
-                        });
-                }).catch((err) => {
-                    reject(err);
-                });
-        } catch (err) {
-            reject(err);
+        url = (await fetch(url)).url
+        const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
+        if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
+        const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
+        const { data } = await axios.get(urlTik, {
+            headers: {
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
+            }
+        });
+        let result = [];
+        const config = {
+            headers: {
+                'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'origin': 'https://tikmate.app',
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Mobile Safari/537.36'
+            },
+            data: {
+                url
+            }
         }
+        axios.post('https://api.tikmate.app/api/lookup', new URLSearchParams(config.data), config.headers)
+            .then((res) => {
+                // console.log(res.data);
+                const urlVideo = `https://pride.nowmvideo.com/download/${res.data.token}/${res.data.author_name}.mp4?hd=1`;
+                res.data.wm = data.itemInfo.itemStruct.video.downloadAddr;
+                res.data.nowm = urlVideo;
+                res.data.music = data.itemInfo.itemStruct.music.playUrl;
+                res.data.desc = data.itemInfo.itemStruct.desc;
+                delete res.data.token;
+                result.push(res.data);
+                resolve(result[0]);
+            }).catch((err) => {
+                reject(err);
+            });
     })
 }
 
