@@ -238,7 +238,7 @@ Salam Kenal👋
 			try {
 				const resultMedia = await getMediaSession(user_id);
 				resetMediaSession(user_id, 'tkt');
-				await sendMedia(from, resultMedia.urlNowm);
+				await sendVideo(from, resultMedia.urlNowm);
 			} catch (err) {
 				console.error(err);
 				sendText(from, mess.error.link);

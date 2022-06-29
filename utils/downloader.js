@@ -299,28 +299,44 @@ const tiktokDl = (url) => {
                 accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             }
         });
-        let result = [];
+        let result = { info: {}, data: {} };
         const config = {
             headers: {
                 'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                'origin': 'https://tikmate.app',
+                'cookie': 'ad_client=ssstik; __cflb=0H28v8EEysMCvTTqt77c9SETiGuTYdXPZiyRzXzaXdD; PHPSESSID=t4n27sj8jr2q1vh3m2konn5585',
+                'origin': 'https://ssstik.io',
                 'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Mobile Safari/537.36'
             },
             data: {
-                url
+                id: url,
+                locale: 'id',
+                gc: 0,
+                tt: 0,
+                ts: 0,
+                ss: '741ddaee1766'
             }
         }
-        axios.post('https://api.tikmate.app/api/lookup', new URLSearchParams(config.data), config.headers)
+        axios.post('https://ssstik.io/741ddaee1766?url=dl', new URLSearchParams(config.data), config.headers)
             .then((res) => {
-                // console.log(res.data);
-                const urlVideo = `https://pride.nowmvideo.com/download/${res.data.token}/${res.data.author_name}.mp4?hd=1`;
-                res.data.wm = data.itemInfo.itemStruct.video.downloadAddr;
-                res.data.nowm = urlVideo;
-                res.data.music = data.itemInfo.itemStruct.music.playUrl;
-                res.data.desc = data.itemInfo.itemStruct.desc;
-                delete res.data.token;
-                result.push(res.data);
-                resolve(result[0]);
+                const $ = cheerio.load(res.data);
+                const link = [];
+                $('a').each((i, e) => {
+                    link.push($(e).attr('href'));
+                })
+                result.data.wm = data.itemInfo.itemStruct.video.downloadAddr;
+                result.data.nowm = link[0];
+                result.data.nowm2 = link[2];
+                result.data.nowmHd = link[1];
+                result.data.music = data.itemInfo.itemStruct.music.playUrl;
+                result.data.music2 = link[4];
+                result.info = {
+                    nickname: data.itemInfo.itemStruct.author.nickname,
+                    username: '@' + data.itemInfo.itemStruct.author.uniqueId,
+                    desc: data.itemInfo.itemStruct.desc,
+                    created: new Date(data.itemInfo.itemStruct.createTime * 1000).toLocaleDateString('id'),
+                    image: $('img').attr('src'),
+                }
+                resolve(result);
             }).catch((err) => {
                 reject(err);
             });
