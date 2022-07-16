@@ -16,42 +16,41 @@ function secondToFormatClock(s) {
  */
 function downloader(url) {
     return new Promise((resolve, reject) => {
-        axios.request({
-            url: 'https://aiovideodl.ml/',
-            method: 'GET',
+        // axios.request({
+        //     url: 'https://aiovideodl.ml/',
+        //     method: 'GET',
+        //     headers: {
+        //         "accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        //         "cookie": 'cf_clearance=bwC9I8Vu4CFFPA_lEu0qPzH0rNq1RHAklfRKKdAN9DE-1657769473-0-250; PHPSESSID=f9d21a471fd55d8b12b7121cac8793c4; pll_language=en; _ga=GA1.2.986187949.1657769476; _gid=GA1.2.2032645486.1657769476; _gat_gtag_UA_46116261_21=1',
+        //         "user-agent": 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+        //     }
+        // }).then(({ data }) => {
+        //     const $ = cheerio.load(data);
+        //     const token = $('#token').attr('value')
+        let config = {
             headers: {
-                "accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                "content-type": 'application/x-www-form-urlencoded',
                 "cookie": 'pll_language=en; PHPSESSID=65e21fe835973041fd6a2eb8ebc65635',
                 "user-agent": 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
+            },
+            data: {
+                "url": url,
+                "token": '4a5116e137af9015ae34593d32d648f40827794550f9f11f65c33879fc1187ae'
             }
-        }).then(({ data }) => {
-            const $ = cheerio.load(data);
-            const token = $('#token').attr('value')
-            let config = {
-                headers: {
-                    "content-type": 'application/x-www-form-urlencoded',
-                    "cookie": 'pll_language=en; PHPSESSID=65e21fe835973041fd6a2eb8ebc65635',
-                    "user-agent": 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-                },
-                data: {
-                    "url": url,
-                    "action": 'post',
-                    "token": token
-                }
-            }
-            axios.post('https://aiovideodl.ml/wp-json/aio-dl/video-data/', qs.stringify(config.data), { headers: config.headers })
-                .then((result) => {
-                    resolve({
-                        author: 'Staz-Yu',
-                        status: 200,
-                        result: result.data
-                    })
-                }).catch((err) => {
-                    reject(err)
-                });
-        }).catch(err => {
-            reject(err)
-        })
+        }
+        axios.post('https://aiovideodl.ml/wp-json/aio-dl/video-data/', qs.stringify(config.data), { headers: config.headers })
+            .then((result) => {
+                resolve({
+                    author: 'Staz-Yu',
+                    status: 200,
+                    result: result.data
+                })
+            }).catch((err) => {
+                reject(err)
+            });
+        // }).catch(err => {
+        //     reject(err)
+        // })
     });
 }
 
@@ -289,61 +288,45 @@ async function pinterest(query) {
 
 const tiktokDl = (url) => {
     return new Promise(async (resolve, reject) => {
-        try {
-            url = (await fetch(url)).url
-            const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
-            if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
-            const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
-            const { data } = await axios.get(urlTik, {
-                headers: {
-                    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
-                    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-                }
-            });
-            let result = { info: {}, data: {} };
-            const config = {
-                headers: {
-                    'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    'cookie': 'ad_client=ssstik; __cflb=0H28v8EEysMCvTTqt77c9SETiGuTYdXPZiyRzXzaXdD; PHPSESSID=t4n27sj8jr2q1vh3m2konn5585',
-                    'origin': 'https://ssstik.io',
-                    'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Mobile Safari/537.36'
-                },
-                data: {
-                    id: url,
-                    locale: 'id',
-                    gc: 0,
-                    tt: 0,
-                    ts: 0,
-                    ss: '741ddaee1766'
-                }
+        url = (await fetch(url)).url
+        const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
+        if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
+        const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
+        const { data } = await axios.get(urlTik, {
+            headers: {
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
+                accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
             }
-            axios.post('https://ssstik.io/741ddaee1766?url=dl', new URLSearchParams(config.data), config.headers)
-                .then((res) => {
-                    const $ = cheerio.load(res.data);
-                    const link = [];
-                    $('a').each((i, e) => {
-                        link.push($(e).attr('href'));
-                    })
-                    result.data.wm = data.itemInfo.itemStruct.video.downloadAddr;
-                    result.data.nowm = link[0];
-                    result.data.nowm2 = link[2];
-                    result.data.nowmHd = link[1];
-                    result.data.music = data.itemInfo.itemStruct.music.playUrl;
-                    result.data.music2 = link[4];
-                    result.info = {
-                        nickname: data.itemInfo.itemStruct.author.nickname,
-                        username: '@' + data.itemInfo.itemStruct.author.uniqueId,
-                        desc: data.itemInfo.itemStruct.desc,
-                        created: new Date(data.itemInfo.itemStruct.createTime * 1000).toLocaleDateString('id'),
-                        image: $('img').attr('src'),
-                    }
-                    resolve(result);
-                }).catch((err) => {
-                    reject(err);
-                });
-        } catch (err) {
-            reject(new Error('Link tidak valid!'));
+        });
+        let result = { info: {}, data: {} };
+        const config = {
+            headers: {
+                'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Mobile Safari/537.36'
+            },
+            data: {
+                url: url
+            }
         }
+        axios.get(`https://tiktok-dl.id/info?url=${url}`)
+            .then((res) => {
+                const link = res.data.aweme_detail.video.play_addr.url_list
+                result.data.wm = data.itemInfo.itemStruct.video.downloadAddr;
+                result.data.nowm = link[0];
+                result.data.nowm2 = link[1];
+                result.data.nowmhd = link[2];
+                result.data.music = data.itemInfo.itemStruct.music.playUrl;
+                result.data.music2 = res.data.aweme_detail.music.play_url.uri;
+                result.info = {
+                    nickname: data.itemInfo.itemStruct.author.nickname,
+                    username: '@' + data.itemInfo.itemStruct.author.uniqueId,
+                    desc: data.itemInfo.itemStruct.desc,
+                    created: new Date(data.itemInfo.itemStruct.createTime * 1000).toLocaleDateString('id'),
+                    image: res.data.aweme_detail.video.origin_cover.url_list[0],
+                }
+                resolve(result);
+            }).catch((err) => {
+                reject(err);
+            });
     })
 }
 
