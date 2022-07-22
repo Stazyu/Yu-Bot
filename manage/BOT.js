@@ -138,7 +138,6 @@ Salam Kenal👋
 	 */
 	const readCommand = async (receive) => {
 		const { chat, from, isOwner, isGroupAdmin, command, prefix, args, isButtonResponseMessage, isTemplateButtonReplyMessage } = receive;
-		console.log(receive);
 		const dir = readdirSync(path.join(__dirname, '../lib/command'));
 		// Print log in terminal
 		bot.printLog(receive);
