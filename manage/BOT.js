@@ -138,6 +138,7 @@ Salam Kenal👋
 	 */
 	const readCommand = async (receive) => {
 		const { chat, from, isOwner, isGroupAdmin, command, prefix, args, isButtonResponseMessage, isTemplateButtonReplyMessage } = receive;
+		console.log(receive);
 		const dir = readdirSync(path.join(__dirname, '../lib/command'));
 		// Print log in terminal
 		bot.printLog(receive);
@@ -159,7 +160,7 @@ Salam Kenal👋
 					arrayCommand.push(v);
 					if (v === command) {
 						if (cmd_result.isOwner && !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Owner gan' }, { quoted: chat })
-						if (cmd_result.isGroupAdmin && !isGroupAdmin || cmd_result.isGroupAdmin && !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Admin Group gan' }, { quoted: chat })
+						if (cmd_result.isGroupAdmin && !isGroupAdmin && !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Admin Group gan' }, { quoted: chat })
 						await cmd_result.execute(receive, bot.sock);
 						// Command help
 					} else if (!isTemplateButtonReplyMessage && command === 'help' && args[0] === v) {
