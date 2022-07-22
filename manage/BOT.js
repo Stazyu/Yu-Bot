@@ -159,7 +159,7 @@ Salam Kenal👋
 					arrayCommand.push(v);
 					if (v === command) {
 						if (cmd_result.isOwner && !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Owner gan' }, { quoted: chat })
-						if (cmd_result.isGroupAdmin && !isGroupAdmin && !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Admin Group gan' }, { quoted: chat })
+						if (cmd_result.isGroupAdmin && !isGroupAdmin || !isOwner) return bot.sock.sendMessage(from, { 'text': 'Khusus Admin Group gan' }, { quoted: chat })
 						await cmd_result.execute(receive, bot.sock);
 						// Command help
 					} else if (!isTemplateButtonReplyMessage && command === 'help' && args[0] === v) {
