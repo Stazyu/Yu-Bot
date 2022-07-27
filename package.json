@@ -43,7 +43,7 @@
     "socket.io-client": "^4.4.1",
     "speed-test": "^3.0.0",
     "vm2": "^3.9.9",
-    "wa-sticker-formatter": "^4.2.0",
+    "wa-sticker-formatter": "^4.3.2",
     "yt-search": "^2.10.3",
     "ytdl-core": "^4.11.0"
   },
