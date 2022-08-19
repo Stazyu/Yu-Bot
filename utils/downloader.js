@@ -1,7 +1,8 @@
 const cheerio = require('cheerio')
 const { default: axios } = require('axios')
-const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
+const fetch = require('node-fetch');
 const ytdlcore = require('ytdl-core')
+const yts = require("yt-search");
 const qs = require('qs')
 const { NodeVM } = require('vm2');
 
@@ -103,8 +104,9 @@ async function ytdDownload(url) {
                     provider: 'yt1s.com'
                 }
                 try {
-                    const thumb = await ytdlcore.getInfo(url)
-                    ytResult.thumbnail = thumb.player_response.microformat.playerMicroformatRenderer.thumbnail.thumbnails[0].url
+                    // const thumb = await ytdlcore.getInfo(url)
+                    const thumb = await yts(res.data.title);
+                    ytResult.thumbnail = thumb.videos[0].thumbnail
                     const resultMp3 = await axios.post('https://yt1s.com/api/ajaxConvert/convert', qs.stringify(formMp3128Kbps))
                     ytResult.detailMp3.url = resultMp3.data.dlink
                     const resultMp4 = await axios.post('https://yt1s.com/api/ajaxConvert/convert', qs.stringify(formMp4720p))

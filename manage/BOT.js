@@ -324,8 +324,8 @@ Link Group : https://chat.whatsapp.com/KEdt4oziB2qBpdL4KKNvIu
 			// { index: 4, quickReplyButton: { displayText: 'TERMS OF USE', id: 'tos' } },
 			{ index: 4, quickReplyButton: { displayText: 'GROUP YU-BOT', id: 'groupbot' } },
 		]
-		if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: await infoBot(receive) });
-		if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: await infoBot(receive) });
+		if (command === 'help') return await sendTemplateButton(from, templateButtons_help, { text: await help(receive), footer: await infoBot(receive), viewOnce: true });
+		if (command === 'menu') return await sendTemplateButton(from, templateButtons_menu, { text: await menu(receive), footer: await infoBot(receive), viewOnce: true });
 	}
 }
 waBot();
