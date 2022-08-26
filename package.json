@@ -10,7 +10,7 @@
   "author": "Wahyu-HP",
   "license": "MIT",
   "dependencies": {
-    "@adiwajshing/baileys": "^4.3.0",
+    "@adiwajshing/baileys": "^4.4.0",
     "@phaticusthiccy/open-apis": "^1.8.5",
     "@vitalets/google-translate-api": "^8.0.0",
     "acrcloud": "^1.4.0",
