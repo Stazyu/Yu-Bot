@@ -1,10 +1,17 @@
-const base64ToImageConvert = require('base64-to-image');
+/**
+ * Get the tiktok id.
+ * @param {string} urlString - the url from which you want to extract the id
+ * @returns {string|undefined}
+ */
+function tiktokUrlToVideoId(urlString) {
+	// Parse basic url and embeds
+	const basicReg = /tiktok\.com(.*)\/video\/(\d+)/gm;
+	const basicParsed = basicReg.exec(urlString);
+	if (basicParsed && basicParsed.length > 2) {
+		return basicParsed[2];
+	}
 
-const base64ToImage = async (base64, path, fileNameImage, type = 'png') => {
-	const optionalObj = { fileName: fileNameImage, type: type };
-
-	const { imageType, fileName } = await base64ToImageConvert(base64, path, optionalObj); // Only synchronous using
-	return path + fileName
+	return undefined;
 }
 
-module.exports = { base64ToImage }
+module.exports = { tiktokUrlToVideoId }
