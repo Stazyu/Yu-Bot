@@ -5,6 +5,7 @@ const ytdlcore = require('ytdl-core')
 const yts = require("yt-search");
 const qs = require('qs')
 const { NodeVM } = require('vm2');
+const { tiktokUrlToVideoId } = require('../helpers/converter');
 
 function secondToFormatClock(s) {
     return (s - (s %= 60)) / 60 + (9 < s ? ':' : ':0') + s
@@ -291,18 +292,10 @@ async function pinterest(query) {
 const tiktokDl = (url) => {
     return new Promise(async (resolve, reject) => {
         try {
-            // url = (await fetch(url)).url
-            // const regTik = /(?:http(?:s|):\/\/|)(?:www\.|)tiktok.com\/([@. -_ 0-9 A-Z a-z]{1,35})\/([a-z]{5,10})\/([0-9]{10,25})/gi.exec(url);
-            // if (regTik[1] === null) reject(new Error('Ada masalah di link!'));
-            // const urlTik = `https://www.tiktok.com/node/share/video/${regTik[1]}/${regTik[3]}`;
-            // const { data } = await axios.get(urlTik, {
-            //     headers: {
-            //         'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36',
-            //         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            //     }
-            // });
+            url = (await fetch(url)).url
+            const video_id = tiktokUrlToVideoId(url);
             let result = { info: {}, data: {} };
-            axios.get(`https://tiktok-dl.id/info?url=${url}`)
+            axios.get(`https://api2.musical.ly/aweme/v1/aweme/detail/?aweme_id=${video_id}`)
                 .then((res) => {
                     const linkNowm = res.data.aweme_detail.video.play_addr.url_list
                     result.data.wm = res.data.aweme_detail.video.download_addr.url_list[0];
@@ -343,6 +336,13 @@ const igDownloader = (url) => {
                 'content-length': 89,
                 'content-type': 'application/x-www-form-urlencoded',
                 origin: 'https://downloadgram.org',
+                'ec-ch-ua-mobile': '?0',
+                'sec-ch-ua-platform': "Windows",
+                'sec-fetch-dest': 'document',
+                'sec-fetch-mode': 'navigate',
+                'sec-fetch-site': 'same-origin',
+                'sec-fetch-user': '?1',
+                'upgrade-insecure-requests': 1,
                 'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.84 Mobile Safari/537.36'
             },
             data: {
@@ -353,8 +353,9 @@ const igDownloader = (url) => {
         axios.post('https://downloadgram.org/', new URLSearchParams(Object.entries(config.data)), config.header)
             .then((res) => {
                 const { data } = res;
+                console.log(data);
                 const $ = cheerio.load(data);
-                $('#downloadBox').find('a').each((i, e) => {
+                $('#dlsection').find('a').each((i, e) => {
                     result.push({ url: $(e).attr('href') });
                 })
                 resolve(result);
