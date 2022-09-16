@@ -18,41 +18,41 @@ function secondToFormatClock(s) {
  */
 function downloader(url) {
     return new Promise((resolve, reject) => {
-        // axios.request({
-        //     url: 'https://aiovideodl.ml/',
-        //     method: 'GET',
-        //     headers: {
-        //         "accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-        //         "cookie": 'cf_clearance=bwC9I8Vu4CFFPA_lEu0qPzH0rNq1RHAklfRKKdAN9DE-1657769473-0-250; PHPSESSID=f9d21a471fd55d8b12b7121cac8793c4; pll_language=en; _ga=GA1.2.986187949.1657769476; _gid=GA1.2.2032645486.1657769476; _gat_gtag_UA_46116261_21=1',
-        //         "user-agent": 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1'
-        //     }
-        // }).then(({ data }) => {
-        //     const $ = cheerio.load(data);
-        //     const token = $('#token').attr('value')
-        let config = {
+        axios.request({
+            url: 'https://tikdownloader.online/',
+            method: 'GET',
             headers: {
-                "content-type": 'application/x-www-form-urlencoded',
-                "cookie": 'PHPSESSID=95d283903d93877ef09910f6dcd4e5b1; pll_language=id',
+                "accept": 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+                "cookie": 'PHPSESSID=a4c51da1508279a0acbc26f680230bea; pll_language=en',
                 "user-agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
-            },
-            data: {
-                "url": url,
-                "token": '2bd7d1f6a3138b2758fd9b56b657dab82cd274ec439f72a65a96afe45f49de97'
             }
-        }
-        axios.post('https://tikdownloader.online/wp-json/aio-dl/video-data/', qs.stringify(config.data), { headers: config.headers })
-            .then((result) => {
-                resolve({
-                    author: 'Staz-Yu',
-                    status: 200,
-                    result: result.data
-                })
-            }).catch((err) => {
-                reject(err)
-            });
-        // }).catch(err => {
-        //     reject(err)
-        // })
+        }).then(({ data }) => {
+            const $ = cheerio.load(data);
+            const token = $('token').attr('value')
+            let config = {
+                headers: {
+                    "content-type": 'application/x-www-form-urlencoded',
+                    "cookie": 'PHPSESSID=95d283903d93877ef09910f6dcd4e5b1; pll_language=id',
+                    "user-agent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36'
+                },
+                data: {
+                    "url": url,
+                    "token": token
+                }
+            }
+            axios.post('https://tikdownloader.online/wp-json/aio-dl/video-data/', qs.stringify(config.data), { headers: config.headers })
+                .then((result) => {
+                    resolve({
+                        author: 'Staz-Yu',
+                        status: 200,
+                        result: result.data
+                    })
+                }).catch((err) => {
+                    reject(err)
+                });
+        }).catch(err => {
+            reject(err)
+        })
     });
 }
 
