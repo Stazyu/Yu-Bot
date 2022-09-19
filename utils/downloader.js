@@ -1,7 +1,6 @@
 const cheerio = require('cheerio')
 const { default: axios } = require('axios')
 const fetch = require('node-fetch');
-const ytdlcore = require('ytdl-core')
 const yts = require("yt-search");
 const qs = require('qs')
 const { NodeVM } = require('vm2');
@@ -321,6 +320,45 @@ const tiktokDl = (url) => {
     })
 }
 
+const tiktokDl2 = (url) => {
+    return new Promise((resolve, reject) => {
+        const base_url = "https://www.tikwm.com";
+        const config = {
+            heders: {
+                accept: "application/json, text/javascript, */*; q=0.01",
+                "accept-encoding": "gzip, deflate, br",
+                "accept-language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+                "content-length": 153,
+                "content-type": "application/x-www-form-urlencoded; charset=UTF-8",
+                "cookie": "current_language=en",
+                origin: "https://www.tikwm.com",
+                referer: "https://www.tikwm.com/",
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"
+            },
+            data: {
+                url,
+                count: 12,
+                cursor: 0,
+                web: 1,
+                hd: 1
+            }
+        }
+        axios.post(base_url + '/api/', new URLSearchParams(Object.entries(config.data)), config.heders)
+            .then((res) => {
+                res.data.data.cover = base_url + res.data.data.cover;
+                res.data.data.author.avatar = base_url + res.data.data.author.avatar;
+                res.data.data.play = base_url + res.data.data.play;
+                res.data.data.wmplay = base_url + res.data.data.wmplay;
+                res.data.data.hdplay = base_url + res.data.data.hdplay;
+                res.data.data.music = base_url + res.data.data.music;
+                res.data.data.create_time_format = new Date(res.data.data.create_time * 1000).toLocaleDateString('id');
+                resolve(res.data.data);
+            }).catch((err) => {
+                reject(err)
+            });
+    });
+}
+
 /**
  * It takes a URL, and returns a Promise that resolves to an object containing the image URL and the
  * download links
@@ -414,7 +452,7 @@ const igStalk = (username) => {
         if (String(username).startsWith('@')) {
             username = username.slice(1);
         }
-        axios.get(`https://www.instagram.com/jakarta.keras/?__a=1`)
+        axios.get(`https://www.instagram.com/jakarta.keras/?__a=1&__d=dis`)
             .then(({ data }) => {
                 const ig = data.graphql.user;
                 const resultIG = {
@@ -493,6 +531,7 @@ module.exports = {
     igStalk,
     tiktok: downloader,
     tiktokDl: tiktokDl,
+    tiktokDl2: tiktokDl2,
     kwai: downloader,
     like: downloader,
     linkedIn: downloader,
