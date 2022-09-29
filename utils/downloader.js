@@ -405,19 +405,20 @@ const igDownloader = (url) => {
 
 const fbDownloader = async (url) => {
     return new Promise((resolve, reject) => {
-        axios.get('https://fdownloader.net/id', {
+        axios.get('https://fbdownloader.app/id', {
             headers: {
                 accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-                cookie: '.AspNetCore.Antiforgery.xskahbNOLhA=CfDJ8AyBv3EaZnFHivhSKLY2g5NwEmiJsmwg942PDSrP2bunDbZ2JspA4eZ5wYi4cp3AShfTFgVAhbWLWSPyFklwGy_6ni1YP0UAKQQ7VBgppW105cd0as4ixOTwKzGqzWl3XJxdW5CfqXqC-VdcWiBeR8I',
+                cookie: '.AspNetCore.Culture=c=id|uic=id; .AspNetCore.Antiforgery.vmpBg8YRfdE=CfDJ8OnywvFF1zVGu7PLJvtMt7yhTnuI4JBPSKS07ictvqSsUf5jVHKdoHD8c-8goU1NYHvF0a1HyzVngJHNfndaPoMUdaUHn8CCHMUy474pnoeM9-rNsYBRnAAqzihds5oAorxIchoGvPZEkbRrUroCtT8',
                 'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36'
             }
         }).then((res) => {
+            // console.log(res.data);
             const $ = cheerio.load(res.data);
             const token = $('input[name="__RequestVerificationToken"]').attr('value');
             const config = {
                 headers: {
                     'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-                    cookie: '.AspNetCore.Antiforgery.xskahbNOLhA=CfDJ8AyBv3EaZnFHivhSKLY2g5NwEmiJsmwg942PDSrP2bunDbZ2JspA4eZ5wYi4cp3AShfTFgVAhbWLWSPyFklwGy_6ni1YP0UAKQQ7VBgppW105cd0as4ixOTwKzGqzWl3XJxdW5CfqXqC-VdcWiBeR8I',
+                    cookie: '.AspNetCore.Culture=c=id|uic=id; .AspNetCore.Antiforgery.vmpBg8YRfdE=CfDJ8OnywvFF1zVGu7PLJvtMt7yhTnuI4JBPSKS07ictvqSsUf5jVHKdoHD8c-8goU1NYHvF0a1HyzVngJHNfndaPoMUdaUHn8CCHMUy474pnoeM9-rNsYBRnAAqzihds5oAorxIchoGvPZEkbRrUroCtT8',
                     'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Mobile Safari/537.36'
                 },
                 data: {
@@ -425,7 +426,7 @@ const fbDownloader = async (url) => {
                     q: url
                 }
             }
-            axios.post('https://fdownloader.net/api/ajaxSearch', qs.stringify(config.data), { headers: config.headers })
+            axios.post('https://fbdownloader.app/api/ajaxSearch', qs.stringify(config.data), { headers: config.headers })
                 .then((res) => {
                     let result = {
                         hd: null,
@@ -436,7 +437,7 @@ const fbDownloader = async (url) => {
                     const $$ = cheerio.load(res.data.data);
                     result.hd = $$('#fbdownloader > div.tab-wrap > div:nth-child(5) > table > tbody > tr:nth-child(1) > td:nth-child(3) > a').attr('href');
                     result.sd = $$('#fbdownloader > div.tab-wrap > div:nth-child(5) > table > tbody > tr:nth-child(2) > td:nth-child(3) > a').attr('href');
-                    result.duration = $$('#search-result > div.detail > div.thumbnail > div.content > div').find('p').text();
+                    result.duration = $$('#search-result > div.detail > div.thumbnail > div.content > div.clearfix > p').text();
                     resolve(result);
                 }).catch((err) => {
                     reject(err);

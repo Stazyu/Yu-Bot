@@ -302,7 +302,7 @@ Salam Kenal👋
 		}
 		if (!isMedia && newCommand === 'groupbot') {
 			const capt = `*『 Group YU-BOT 』*\n 
-Link Group : https://chat.whatsapp.com/KEdt4oziB2qBpdL4KKNvIu
+Link Group : https://chat.whatsapp.com/IvamMTupkHn2jSZvDFa4ro
 *Silahkan gabung untuk mendapat informasi tentang Bot*`
 			await sendText(from, capt);
 		}
