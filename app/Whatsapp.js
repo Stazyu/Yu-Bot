@@ -216,7 +216,8 @@ class Whatsapp {
 				if (chat.key.remoteJid === 'status@broadcast') return;
 				/* ========== Meta Utama ========== */
 				// if (chat.message.protocolMessage !== undefined)
-				if (!chat.message || chat?.message?.senderKeyDistributionMessage || chat?.message?.protocolMessage) return;
+				if (!chat.message) return;
+				// if (!chat.message || chat?.message?.senderKeyDistributionMessage || chat?.message?.protocolMessage) return;
 				const chatMessage = chat.message;
 				const id = chat.key.id;
 				const from = chat.key.remoteJid;
